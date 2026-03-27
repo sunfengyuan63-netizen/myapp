@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-node-id="b7513782-29b2-11f1-be13-122a9cb60781">
+<head data-node-id="b751715c-29b2-11f1-be13-122a9cb60781">
+  <meta charset="UTF-8" data-node-id="b7514bdc-29b2-11f1-be13-122a9cb60781">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" data-node-id="b7517f08-29b2-11f1-be13-122a9cb60781">
+  <title data-node-id="b7513b9c-29b2-11f1-be13-122a9cb60781">检查详情 - 输电组塔施工违章预判检查系统</title>
+  <link rel="manifest" href="./manifest.json" data-node-id="b7514f7e-29b2-11f1-be13-122a9cb60781">
+  <meta name="theme-color" content="#FF6B00" data-node-id="b7513368-29b2-11f1-be13-122a9cb60781">
+  <link rel="stylesheet" href="./css/styles.css" data-node-id="b7511590-29b2-11f1-be13-122a9cb60781">
+  <script src="./js/tailwind.js" data-node-id="b7518516-29b2-11f1-be13-122a9cb60781"></script>
+  <style data-node-id="b75174d6-29b2-11f1-be13-122a9cb60781">
+    .detail-section {
+      margin-bottom: 2rem;
+    }
+    
+    .detail-section-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .result-item {
+      padding: 1rem;
+      background: var(--bg-elevated);
+      border-radius: 8px;
+      margin-bottom: 0.75rem;
+    }
+    
+    .result-item.status-pass {
+      border-left: 3px solid var(--success);
+    }
+    
+    .result-item.status-problem {
+      border-left: 3px solid var(--danger);
+      background: rgba(230, 57, 70, 0.05);
+    }
+    
+    .result-item.status-na {
+      border-left: 3px solid var(--text-muted);
+      opacity: 0.7;
+    }
+    
+    .result-item.status-rectified {
+      border-left: 3px solid var(--info);
+    }
+    
+    .evidence-thumb {
+      width: 80px;
+      height: 80px;
+      border-radius: 6px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 1px solid var(--border);
+    }
+    
+    .evidence-thumb img,
+    .evidence-thumb video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    
+    .lightbox img,
+    .lightbox video {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+    
+    .lightbox-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      
+      body {
+        background: white;
+        color: black;
+      }
+      
+      .card {
+        border: 1px solid #ddd;
+        box-shadow: none;
+      }
+    }
+  </style>
+<script src="https://creo4u.com/bubble-popup.min.js" data-node-id="b7516982-29b2-11f1-be13-122a9cb60781"></script>
+</head>
+<body class="industrial-bg" data-node-id="b751475e-29b2-11f1-be13-122a9cb60781">
+  <div class="warning-stripe no-print" data-node-id="b7516a5e-29b2-11f1-be13-122a9cb60781"></div>
+  
+  <!-- 顶部导航 -->
+  <nav class="navbar flex items-center justify-between no-print" data-node-id="b751506e-29b2-11f1-be13-122a9cb60781">
+    <div class="flex items-center gap-3" data-node-id="b75175c6-29b2-11f1-be13-122a9cb60781">
+      <button onclick="goBack()" class="p-2 text-secondary hover:text-primary" data-node-id="b7516dc4-29b2-11f1-be13-122a9cb60781">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7517224-29b2-11f1-be13-122a9cb60781">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" data-node-id="b7516b26-29b2-11f1-be13-122a9cb60781"></path>
+        </svg>
+      </button>
+      <div data-node-id="b7514dc6-29b2-11f1-be13-122a9cb60781">
+        <h1 class="font-bold text-lg leading-tight" data-node-id="b7515e9c-29b2-11f1-be13-122a9cb60781">检查详情</h1>
+        <p id="taskNumber" class="text-xs text-muted font-mono" data-node-id="b7511e50-29b2-11f1-be13-122a9cb60781"></p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-2" data-node-id="b7512828-29b2-11f1-be13-122a9cb60781">
+      <!-- 管理人员审核按钮（仅待审核状态且管理人员可见） -->
+      <div id="reviewActions" class="hidden flex gap-2" data-node-id="b7515410-29b2-11f1-be13-122a9cb60781">
+        <button id="approveBtn" class="btn btn-success btn-sm" data-node-id="b75162f2-29b2-11f1-be13-122a9cb60781">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b75159a6-29b2-11f1-be13-122a9cb60781">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" data-node-id="b7517fe4-29b2-11f1-be13-122a9cb60781"></path>
+          </svg>
+          <span class="hidden sm:inline" data-node-id="b75180b6-29b2-11f1-be13-122a9cb60781">审核通过</span>
+        </button>
+        <button id="rejectBtn" class="btn btn-danger btn-sm" data-node-id="b7515154-29b2-11f1-be13-122a9cb60781">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7517864-29b2-11f1-be13-122a9cb60781">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" data-node-id="b75144ca-29b2-11f1-be13-122a9cb60781"></path>
+          </svg>
+          <span class="hidden sm:inline" data-node-id="b751343a-29b2-11f1-be13-122a9cb60781">退回</span>
+        </button>
+      </div>
+      <button onclick="window.print()" class="btn btn-secondary btn-sm" data-node-id="b7516716-29b2-11f1-be13-122a9cb60781">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b75116e4-29b2-11f1-be13-122a9cb60781">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" data-node-id="b751290e-29b2-11f1-be13-122a9cb60781"></path>
+        </svg>
+        <span class="hidden sm:inline" data-node-id="b75141fa-29b2-11f1-be13-122a9cb60781">打印</span>
+      </button>
+    </div>
+  </nav>
+  
+  <main class="p-4 md:p-6 max-w-5xl mx-auto" data-node-id="b75176a2-29b2-11f1-be13-122a9cb60781">
+    <!-- 基本信息 -->
+    <div class="card mb-6" data-node-id="b75163c4-29b2-11f1-be13-122a9cb60781">
+      <div class="card-header" data-node-id="b7513ebc-29b2-11f1-be13-122a9cb60781">
+        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b751524e-29b2-11f1-be13-122a9cb60781">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" data-node-id="b75117c0-29b2-11f1-be13-122a9cb60781"></path>
+        </svg>
+        <h3 class="font-semibold" data-node-id="b75121de-29b2-11f1-be13-122a9cb60781">基本信息</h3>
+        <span id="statusBadge" class="badge badge-muted ml-auto" data-node-id="b751648c-29b2-11f1-be13-122a9cb60781">-</span>
+      </div>
+      <div class="card-body" data-node-id="b7515334-29b2-11f1-be13-122a9cb60781">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6" data-node-id="b7513502-29b2-11f1-be13-122a9cb60781">
+          <div data-node-id="b7512a08-29b2-11f1-be13-122a9cb60781">
+            <span class="text-sm text-muted" data-node-id="b75185e8-29b2-11f1-be13-122a9cb60781">任务编号</span>
+            <p id="infoTaskNumber" class="font-mono font-medium mt-1" data-node-id="b7515b22-29b2-11f1-be13-122a9cb60781">-</p>
+          </div>
+          <div data-node-id="b7512f94-29b2-11f1-be13-122a9cb60781">
+            <span class="text-sm text-muted" data-node-id="b7512ada-29b2-11f1-be13-122a9cb60781">检查人员</span>
+            <p id="infoInspector" class="font-medium mt-1" data-node-id="b75157e4-29b2-11f1-be13-122a9cb60781">-</p>
+          </div>
+          <div data-node-id="b7513f84-29b2-11f1-be13-122a9cb60781">
+            <span class="text-sm text-muted" data-node-id="b7511cc0-29b2-11f1-be13-122a9cb60781">所属公司</span>
+            <p id="infoCompany" class="font-medium mt-1" data-node-id="b7513c64-29b2-11f1-be13-122a9cb60781">-</p>
+          </div>
+          <div data-node-id="b7513d2c-29b2-11f1-be13-122a9cb60781">
+            <span class="text-sm text-muted" data-node-id="b75186ba-29b2-11f1-be13-122a9cb60781">项目名称</span>
+            <p id="infoProject" class="font-medium mt-1" data-node-id="b7513872-29b2-11f1-be13-122a9cb60781">-</p>
+          </div>
+          <div data-node-id="b7515c08-29b2-11f1-be13-122a9cb60781">
+            <span class="text-sm text-muted" data-node-id="b7515cee-29b2-11f1-be13-122a9cb60781">检查日期</span>
+            <p id="infoDate" class="font-medium mt-1" data-node-id="b7516c0c-29b2-11f1-be13-122a9cb60781">-</p>
+          </div>
+          <div data-node-id="b7511d88-29b2-11f1-be13-122a9cb60781">
+            <span class="text-sm text-muted" data-node-id="b75158c0-29b2-11f1-be13-122a9cb60781">创建时间</span>
+            <p id="infoCreatedAt" class="font-medium mt-1" data-node-id="b7518782-29b2-11f1-be13-122a9cb60781">-</p>
+          </div>
+          <div data-node-id="b7514af6-29b2-11f1-be13-122a9cb60781">
+            <span class="text-sm text-muted" data-node-id="b751256c-29b2-11f1-be13-122a9cb60781">检查进度</span>
+            <p id="infoProgress" class="font-medium mt-1" data-node-id="b751730a-29b2-11f1-be13-122a9cb60781">-</p>
+          </div>
+          <div data-node-id="b751323c-29b2-11f1-be13-122a9cb60781">
+            <span class="text-sm text-muted" data-node-id="b75173f0-29b2-11f1-be13-122a9cb60781">发现问题</span>
+            <p id="infoProblems" class="font-medium mt-1" data-node-id="b7516eaa-29b2-11f1-be13-122a9cb60781">-</p>
+          </div>
+        </div>
+        
+        <!-- 审核信息 -->
+        <div id="reviewInfo" class="hidden mt-6 pt-6 border-t border-border" data-node-id="b7514042-29b2-11f1-be13-122a9cb60781">
+          <h4 class="font-medium mb-3" data-node-id="b751655e-29b2-11f1-be13-122a9cb60781">审核信息</h4>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-4" data-node-id="b7513138-29b2-11f1-be13-122a9cb60781">
+            <div data-node-id="b7515f6e-29b2-11f1-be13-122a9cb60781">
+              <span class="text-sm text-muted" data-node-id="b75145a6-29b2-11f1-be13-122a9cb60781">审核状态</span>
+              <p id="reviewStatus" class="font-medium mt-1" data-node-id="b7515546-29b2-11f1-be13-122a9cb60781">-</p>
+            </div>
+            <div data-node-id="b75181e2-29b2-11f1-be13-122a9cb60781">
+              <span class="text-sm text-muted" data-node-id="b751483a-29b2-11f1-be13-122a9cb60781">审核时间</span>
+              <p id="reviewTime" class="font-medium mt-1" data-node-id="b7512bc0-29b2-11f1-be13-122a9cb60781">-</p>
+            </div>
+            <div id="reviewCommentSection" class="hidden md:col-span-3" data-node-id="b7512ca6-29b2-11f1-be13-122a9cb60781">
+              <span class="text-sm text-muted" data-node-id="b751393a-29b2-11f1-be13-122a9cb60781">审核意见</span>
+              <p id="reviewComment" class="font-medium mt-1 text-danger" data-node-id="b7513070-29b2-11f1-be13-122a9cb60781">-</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 检查结果统计 -->
+    <div class="card mb-6" data-node-id="b75142f4-29b2-11f1-be13-122a9cb60781">
+      <div class="card-header" data-node-id="b751884a-29b2-11f1-be13-122a9cb60781">
+        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7516cf2-29b2-11f1-be13-122a9cb60781">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" data-node-id="b75122b0-29b2-11f1-be13-122a9cb60781"></path>
+        </svg>
+        <h3 class="font-semibold" data-node-id="b7514682-29b2-11f1-be13-122a9cb60781">检查结果统计</h3>
+      </div>
+      <div class="card-body" data-node-id="b75182b4-29b2-11f1-be13-122a9cb60781">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" data-node-id="b7516220-29b2-11f1-be13-122a9cb60781">
+          <div class="text-center p-4 bg-success/10 rounded-lg border border-success/30" data-node-id="b7513df4-29b2-11f1-be13-122a9cb60781">
+            <p id="statPass" class="text-3xl font-bold text-success" data-node-id="b75118ce-29b2-11f1-be13-122a9cb60781">0</p>
+            <p class="text-sm text-muted mt-1" data-node-id="b751492a-29b2-11f1-be13-122a9cb60781">无问题/已整改</p>
+          </div>
+          <div class="text-center p-4 bg-muted/10 rounded-lg border border-muted/30" data-node-id="b75143da-29b2-11f1-be13-122a9cb60781">
+            <p id="statNA" class="text-3xl font-bold text-muted" data-node-id="b7514e98-29b2-11f1-be13-122a9cb60781">0</p>
+            <p class="text-sm text-muted mt-1" data-node-id="b751794a-29b2-11f1-be13-122a9cb60781">不涉及</p>
+          </div>
+          <div class="text-center p-4 bg-danger/10 rounded-lg border border-danger/30" data-node-id="b751605e-29b2-11f1-be13-122a9cb60781">
+            <p id="statProblem" class="text-3xl font-bold text-danger" data-node-id="b7512396-29b2-11f1-be13-122a9cb60781">0</p>
+            <p class="text-sm text-muted mt-1" data-node-id="b7512d82-29b2-11f1-be13-122a9cb60781">有问题</p>
+          </div>
+          <div class="text-center p-4 bg-info/10 rounded-lg border border-info/30" data-node-id="b75135de-29b2-11f1-be13-122a9cb60781">
+            <p id="statRectified" class="text-3xl font-bold text-info" data-node-id="b751614e-29b2-11f1-be13-122a9cb60781">0</p>
+            <p class="text-sm text-muted mt-1" data-node-id="b751664e-29b2-11f1-be13-122a9cb60781">已整改</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 检查结果详情 -->
+    <div class="card" data-node-id="b7512468-29b2-11f1-be13-122a9cb60781">
+      <div class="card-header" data-node-id="b7512e9a-29b2-11f1-be13-122a9cb60781">
+        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7513a0c-29b2-11f1-be13-122a9cb60781">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" data-node-id="b7517a1c-29b2-11f1-be13-122a9cb60781"></path>
+        </svg>
+        <h3 class="font-semibold" data-node-id="b7518912-29b2-11f1-be13-122a9cb60781">检查结果详情</h3>
+      </div>
+      <div class="card-body" data-node-id="b7515636-29b2-11f1-be13-122a9cb60781">
+        <!-- 筛选 -->
+        <div class="flex flex-wrap gap-2 mb-4 no-print" data-node-id="b7512652-29b2-11f1-be13-122a9cb60781">
+          <button class="category-tab active" data-filter="all" data-node-id="b7518386-29b2-11f1-be13-122a9cb60781">全部</button>
+          <button class="category-tab" data-filter="problem" data-node-id="b7517c1a-29b2-11f1-be13-122a9cb60781">有问题</button>
+          <button class="category-tab" data-filter="pass" data-node-id="b7514ccc-29b2-11f1-be13-122a9cb60781">无问题</button>
+          <button class="category-tab" data-filter="rectified" data-node-id="b7511996-29b2-11f1-be13-122a9cb60781">已整改</button>
+          <button class="category-tab" data-filter="not_applicable" data-node-id="b751844e-29b2-11f1-be13-122a9cb60781">不涉及</button>
+        </div>
+        
+        <div id="resultsList" class="space-y-3" data-node-id="b75167e8-29b2-11f1-be13-122a9cb60781">
+          <div class="text-center text-muted py-8" data-node-id="b7516f9a-29b2-11f1-be13-122a9cb60781">加载中...</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 操作日志 -->
+    <div class="card mt-6" data-node-id="b7515dca-29b2-11f1-be13-122a9cb60781">
+      <div class="card-header" data-node-id="b751410a-29b2-11f1-be13-122a9cb60781">
+        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b751274c-29b2-11f1-be13-122a9cb60781">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" data-node-id="b7511a68-29b2-11f1-be13-122a9cb60781"></path>
+        </svg>
+        <h3 class="font-semibold" data-node-id="b7514a10-29b2-11f1-be13-122a9cb60781">操作日志</h3>
+      </div>
+      <div class="card-body" data-node-id="b7517080-29b2-11f1-be13-122a9cb60781">
+        <div id="logsList" class="space-y-2" data-node-id="b75168ba-29b2-11f1-be13-122a9cb60781">
+          <div class="text-center text-muted py-4" data-node-id="b751777e-29b2-11f1-be13-122a9cb60781">加载中...</div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Toast 容器 -->
+  <div id="toastContainer" class="toast-container" data-node-id="b7513ad4-29b2-11f1-be13-122a9cb60781"></div>
+  
+  <!-- 加载遮罩 -->
+  <div id="loadingOverlay" class="loading-overlay hidden" data-node-id="b7511b30-29b2-11f1-be13-122a9cb60781">
+    <div class="spinner" data-node-id="b7511bf8-29b2-11f1-be13-122a9cb60781"></div>
+    <p class="text-secondary" data-node-id="b7515712-29b2-11f1-be13-122a9cb60781">加载中...</p>
+  </div>
+  
+  <!-- 图片/视频预览 -->
+  <div id="lightbox" class="lightbox hidden" onclick="closeLightbox()" data-node-id="b7517d14-29b2-11f1-be13-122a9cb60781">
+    <button class="lightbox-close" onclick="closeLightbox()" data-node-id="b75136a6-29b2-11f1-be13-122a9cb60781">×</button>
+    <div id="lightboxContent" data-node-id="b7517af8-29b2-11f1-be13-122a9cb60781"></div>
+  </div>
+
+  <script type="module" data-node-id="b7517e04-29b2-11f1-be13-122a9cb60781">
+    import { supabase, SUPABASE_URL } from './js/supabase.js';
+    import { checkAuth, getCurrentUser } from './js/auth.js';
+    import { createNetworkIndicator } from './js/network-indicator.js';
+    import { getNetworkStatus } from './js/sync-manager.js';
+    import { getOfflineTaskByLocalId, getOfflineResultsByTask, getOfflineEvidenceByResult } from './js/offline-storage.js';
+    
+    // 全局状态
+    let currentUser = null;
+    let taskId = null;
+    let task = null;
+    let categories = [];
+    let items = [];
+    let results = [];
+    let currentFilter = 'all';
+    let isManager = false;
+    let isOfflineMode = false;
+    let isOfflineTask = false;
+    
+    // DOM 元素
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const toastContainer = document.getElementById('toastContainer');
+    
+    // 初始化
+    async function init() {
+      const session = await checkAuth();
+      if (!session) {
+        window.location.href = './index.html';
+        return;
+      }
+      
+      currentUser = await getCurrentUser();
+      isManager = currentUser.isManager || currentUser.roleType === 'manager';
+      
+      // 检查网络状态
+      isOfflineMode = !getNetworkStatus();
+      
+      // 获取任务 ID
+      const urlParams = new URLSearchParams(window.location.search);
+      taskId = urlParams.get('id');
+      
+      // 检查是否为离线任务
+      isOfflineTask = taskId && taskId.startsWith('local_');
+      
+      if (!taskId) {
+        showToast('无效的任务ID', 'error');
+        setTimeout(() => window.location.href = './home.html', 1500);
+        return;
+      }
+      
+      setLoading(true);
+      
+      await loadTask();
+      await loadCategories();
+      await loadItems();
+      await loadResults();
+      if (!isOfflineTask) {
+        await loadLogs();
+      }
+      
+      renderTaskInfo();
+      renderStats();
+      renderResults();
+      setupFilterEvents();
+      setupReviewActions();
+      
+      setLoading(false);
+      
+      // 初始化网络状态指示器
+      await createNetworkIndicator();
+    }
+    
+    // 设置审核操作按钮（管理人员且任务待审核时显示）
+    function setupReviewActions() {
+      if (!isManager || !task || task.status !== 'submitted') return;
+      
+      const reviewActions = document.getElementById('reviewActions');
+      reviewActions.classList.remove('hidden');
+      reviewActions.style.display = 'flex';
+      
+      document.getElementById('approveBtn').addEventListener('click', async () => {
+        if (!confirm('确定要审核通过此检查记录吗？')) return;
+        setLoading(true);
+        try {
+          const { error } = await supabase
+            .from('inspection_tasks')
+            .update({
+              status: 'archived',
+              reviewer_id: currentUser.id,
+              reviewed_at: new Date().toISOString()
+            })
+            .eq('id', taskId);
+          if (error) throw error;
+          await supabase.from('operation_logs').insert({
+            task_id: taskId,
+            operator_name: currentUser.profile?.display_name || currentUser.email,
+            operation_type: 'approve',
+            operation_detail: '审核通过并归档'
+          });
+          showToast('审核通过，记录已归档');
+          setTimeout(() => window.location.href = './home.html', 1500);
+        } catch (err) {
+          showToast('操作失败', 'error');
+        } finally {
+          setLoading(false);
+        }
+      });
+      
+      document.getElementById('rejectBtn').addEventListener('click', async () => {
+        const comment = prompt('请输入退回原因：');
+        if (comment === null) return;
+        if (!comment.trim()) { showToast('请输入退回原因', 'error'); return; }
+        setLoading(true);
+        try {
+          const { error } = await supabase
+            .from('inspection_tasks')
+            .update({
+              status: 'rejected',
+              reviewer_id: currentUser.id,
+              review_comment: comment.trim(),
+              reviewed_at: new Date().toISOString()
+            })
+            .eq('id', taskId);
+          if (error) throw error;
+          await supabase.from('operation_logs').insert({
+            task_id: taskId,
+            operator_name: currentUser.profile?.display_name || currentUser.email,
+            operation_type: 'reject',
+            operation_detail: `退回：${comment.trim()}`
+          });
+          showToast('已退回');
+          setTimeout(() => window.location.href = './home.html', 1500);
+        } catch (err) {
+          showToast('操作失败', 'error');
+        } finally {
+          setLoading(false);
+        }
+      });
+    }
+    
+    init();
+    
+    // 加载任务信息
+    async function loadTask() {
+      // 离线任务从 IndexedDB 加载
+      if (isOfflineTask) {
+        const offlineTask = await getOfflineTaskByLocalId(taskId);
+        if (!offlineTask) {
+          showToast('离线任务不存在', 'error');
+          setTimeout(() => window.location.href = './home.html', 1500);
+          return;
+        }
+        task = {
+          id: offlineTask.localId,
+          task_number: offlineTask.taskNumber,
+          inspector_name: offlineTask.inspectorName,
+          company_name: offlineTask.companyName,
+          project_name: offlineTask.projectName,
+          inspection_date: offlineTask.inspectionDate,
+          status: offlineTask.status,
+          total_items: offlineTask.totalItems,
+          completed_items: offlineTask.completedItems,
+          problem_items: offlineTask.problemItems,
+          created_by: offlineTask.createdBy,
+          _isOffline: true,
+          _syncStatus: offlineTask.syncStatus
+        };
+        return;
+      }
+      
+      // 在线模式
+      const { data, error } = await supabase
+        .from('inspection_tasks')
+        .select('*, checklist_types(name, code, total_items)')
+        .eq('id', taskId)
+        .single();
+      
+      if (error || !data) {
+        showToast('任务不存在或无权访问', 'error');
+        setTimeout(() => window.location.href = './home.html', 1500);
+        return;
+      }
+      
+      task = data;
+    }
+    
+    // 加载类别
+    async function loadCategories() {
+      // 根据任务类型加载对应的类别表
+      const typeCode = task?.checklist_types?.code ||
+        (task?.company_name?.includes('输电') ? 'transmission' : 'substation');
+      const tableName = typeCode === 'substation' ? 'substation_categories' : 'inspection_categories';
+      const { data } = await supabase
+        .from(tableName)
+        .select('*')
+        .order('sort_order');
+      categories = data || [];
+    }
+    
+    // 加载检查项
+    async function loadItems() {
+      // 根据任务类型加载对应的项目表
+      const typeCode = task?.checklist_types?.code ||
+        (task?.company_name?.includes('输电') ? 'transmission' : 'substation');
+      const tableName = typeCode === 'substation' ? 'substation_items' : 'inspection_items';
+      const { data } = await supabase
+        .from(tableName)
+        .select('*')
+        .order('sequence_number');
+      items = data || [];
+    }
+    
+    // 加载检查结果
+    async function loadResults() {
+      const { data } = await supabase
+        .from('inspection_results')
+        .select('*, evidence_files(*)')
+        .eq('task_id', taskId);
+      
+      results = data || [];
+    }
+    
+    // 加载操作日志
+    async function loadLogs() {
+      const { data } = await supabase
+        .from('operation_logs')
+        .select('*')
+        .eq('task_id', taskId)
+        .order('created_at', { ascending: false });
+      
+      renderLogs(data || []);
+    }
+    
+    // 渲染任务信息
+    function renderTaskInfo() {
+      document.getElementById('taskNumber').textContent = task.task_number;
+      document.getElementById('infoTaskNumber').textContent = task.task_number;
+      document.getElementById('infoInspector').textContent = task.inspector_name;
+      document.getElementById('infoCompany').textContent = task.company_name;
+      document.getElementById('infoProject').textContent = task.project_name;
+      document.getElementById('infoDate').textContent = formatDate(task.inspection_date);
+      document.getElementById('infoCreatedAt').textContent = formatDateTime(task.created_at);
+      document.getElementById('infoProgress').textContent = `${task.completed_items}/${task.total_items}`;
+      document.getElementById('infoProblems').textContent = task.problem_items > 0 
+        ? `${task.problem_items} 项` 
+        : '无';
+      
+      // 状态徽章
+      const statusBadge = document.getElementById('statusBadge');
+      statusBadge.textContent = getStatusText(task.status);
+      statusBadge.className = `badge ${getStatusBadgeClass(task.status)} ml-auto`;
+      
+      // 审核信息
+      if (task.reviewed_at) {
+        document.getElementById('reviewInfo').classList.remove('hidden');
+        document.getElementById('reviewStatus').textContent = getStatusText(task.status);
+        document.getElementById('reviewTime').textContent = formatDateTime(task.reviewed_at);
+        
+        if (task.review_comment) {
+          document.getElementById('reviewCommentSection').classList.remove('hidden');
+          document.getElementById('reviewComment').textContent = task.review_comment;
+        }
+      }
+    }
+    
+    // 渲染统计
+    function renderStats() {
+      const pass = results.filter(r => r.status === 'pass').length;
+      const na = results.filter(r => r.status === 'not_applicable').length;
+      const problem = results.filter(r => r.status === 'problem').length;
+      const rectified = results.filter(r => r.status === 'rectified').length;
+      
+      document.getElementById('statPass').textContent = pass;
+      document.getElementById('statNA').textContent = na;
+      document.getElementById('statProblem').textContent = problem;
+      document.getElementById('statRectified').textContent = rectified;
+    }
+    
+    // 渲染检查结果
+    function renderResults() {
+      const container = document.getElementById('resultsList');
+      
+      // 合并检查项和结果
+      const itemsWithResults = items.map(item => {
+        const result = results.find(r => r.item_id === item.id);
+        const category = categories.find(c => c.id === item.category_id);
+        return {
+          ...item,
+          category_name: category?.name || '',
+          result: result || null
+        };
+      });
+      
+      // 筛选
+      let filtered = itemsWithResults;
+      if (currentFilter !== 'all') {
+        filtered = itemsWithResults.filter(item => item.result?.status === currentFilter);
+      }
+      
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted py-8">暂无数据</div>';
+        return;
+      }
+      
+      container.innerHTML = filtered.map(item => {
+        const status = item.result?.status || '';
+        let statusClass = '';
+        if (status === 'pass' || status === 'rectified') statusClass = 'status-pass';
+        else if (status === 'problem') statusClass = 'status-problem';
+        else if (status === 'not_applicable') statusClass = 'status-na';
+        
+        const files = item.result?.evidence_files || [];
+        
+        return `
+          <div class="result-item ${statusClass}">
+            <div class="flex items-start gap-3">
+              <span class="font-mono text-primary font-bold">${item.sequence_number}</span>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="badge badge-muted text-xs">${item.category_name}</span>
+                  ${status ? `<span class="badge ${getResultBadgeClass(status)} text-xs">${getResultStatusText(status)}</span>` : ''}
+                </div>
+                <h4 class="font-medium">${item.violation_content}</h4>
+                <p class="text-sm text-secondary mt-1">${item.inspection_points}</p>
+                
+                ${status === 'problem' || status === 'rectified' ? `
+                  <div class="mt-3 p-3 bg-dark rounded-lg">
+                    <p class="text-sm">
+                      <span class="text-muted">整改措施：</span>
+                      <span>${item.result?.rectification_measure || '-'}</span>
+                    </p>
+                    ${item.result?.rectification_date ? `
+                      <p class="text-sm mt-1">
+                        <span class="text-muted">整改日期：</span>
+                        <span>${formatDate(item.result.rectification_date)}</span>
+                      </p>
+                    ` : ''}
+                  </div>
+                ` : ''}
+                
+                ${files.length > 0 ? `
+                  <div class="mt-3">
+                    <p class="text-sm text-muted mb-2">佐证资料 (${files.length})</p>
+                    <div class="flex flex-wrap gap-2">
+                      ${files.map(file => `
+                        <div class="evidence-thumb" onclick="openLightbox('${SUPABASE_URL}/storage/v1/object/public/evidence-files/${file.storage_path}', '${file.file_type}')">
+                          ${file.file_type === 'image' 
+                            ? `<img src="${SUPABASE_URL}/storage/v1/object/public/evidence-files/${file.storage_path}" alt="${file.file_name}">`
+                            : `<video><source src="${SUPABASE_URL}/storage/v1/object/public/evidence-files/${file.storage_path}"></video>`
+                          }
+                        </div>
+                      `).join('')}
+                    </div>
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // 渲染操作日志
+    function renderLogs(logs) {
+      const container = document.getElementById('logsList');
+      
+      if (logs.length === 0) {
+        container.innerHTML = '<div class="text-center text-muted py-4">暂无操作日志</div>';
+        return;
+      }
+      
+      container.innerHTML = logs.map(log => `
+        <div class="flex items-center gap-3 py-2 border-b border-border last:border-0">
+          <div class="w-2 h-2 rounded-full ${getLogDotClass(log.operation_type)}"></div>
+          <div class="flex-1">
+            <span class="text-sm">${log.operation_detail || getLogText(log.operation_type)}</span>
+            <span class="text-sm text-muted ml-2">- ${log.operator_name}</span>
+          </div>
+          <span class="text-xs text-muted">${formatDateTime(log.created_at)}</span>
+        </div>
+      `).join('');
+    }
+    
+    // 设置筛选事件
+    function setupFilterEvents() {
+      document.querySelectorAll('[data-filter]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentFilter = btn.dataset.filter;
+          document.querySelectorAll('[data-filter]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          renderResults();
+        });
+      });
+    }
+    
+    // 辅助函数
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const date = new Date(dateStr);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+    
+    function formatDateTime(dateStr) {
+      if (!dateStr) return '-';
+      const date = new Date(dateStr);
+      return `${formatDate(dateStr)} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    }
+    
+    function getStatusText(status) {
+      const map = {
+        'draft': '草稿',
+        'submitted': '待审核',
+        'reviewing': '审核中',
+        'approved': '已通过',
+        'rejected': '已退回',
+        'archived': '已归档'
+      };
+      return map[status] || status;
+    }
+    
+    function getStatusBadgeClass(status) {
+      const map = {
+        'draft': 'badge-warning',
+        'submitted': 'badge-info',
+        'reviewing': 'badge-info',
+        'approved': 'badge-success',
+        'rejected': 'badge-danger',
+        'archived': 'badge-success'
+      };
+      return map[status] || 'badge-muted';
+    }
+    
+    function getResultStatusText(status) {
+      const map = {
+        'pass': '无问题',
+        'not_applicable': '不涉及',
+        'problem': '有问题',
+        'rectified': '已整改'
+      };
+      return map[status] || '-';
+    }
+    
+    function getResultBadgeClass(status) {
+      const map = {
+        'pass': 'badge-success',
+        'not_applicable': 'badge-muted',
+        'problem': 'badge-danger',
+        'rectified': 'badge-info'
+      };
+      return map[status] || 'badge-muted';
+    }
+    
+    function getLogDotClass(type) {
+      const map = {
+        'create': 'bg-primary',
+        'submit': 'bg-info',
+        'approve': 'bg-success',
+        'reject': 'bg-danger'
+      };
+      return map[type] || 'bg-muted';
+    }
+    
+    function getLogText(type) {
+      const map = {
+        'create': '创建检查任务',
+        'submit': '提交审核',
+        'approve': '审核通过',
+        'reject': '审核退回'
+      };
+      return map[type] || type;
+    }
+    
+    // 返回
+    window.goBack = function() {
+      window.history.back();
+    };
+    
+    // 打开灯箱
+    window.openLightbox = function(url, type) {
+      event.stopPropagation();
+      const lightbox = document.getElementById('lightbox');
+      const content = document.getElementById('lightboxContent');
+      
+      if (type === 'image') {
+        content.innerHTML = `<img src="${url}" alt="预览">`;
+      } else {
+        content.innerHTML = `<video controls autoplay><source src="${url}"></video>`;
+      }
+      
+      lightbox.classList.remove('hidden');
+    };
+    
+    // 关闭灯箱
+    window.closeLightbox = function() {
+      const lightbox = document.getElementById('lightbox');
+      lightbox.classList.add('hidden');
+      document.getElementById('lightboxContent').innerHTML = '';
+    };
+    
+    // Toast
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <span>${type === 'success' ? '✓' : type === 'error' ? '✕' : '⚠'}</span>
+        <span>${message}</span>
+      `;
+      toastContainer.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+    
+    // Loading
+    function setLoading(show) {
+      loadingOverlay.classList.toggle('hidden', !show);
+    }
+  </script>
+</body>
+</html>

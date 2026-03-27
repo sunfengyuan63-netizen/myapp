@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-node-id="b752a2f2-29b2-11f1-be13-122a9cb60781">
+<head data-node-id="b752b792-29b2-11f1-be13-122a9cb60781">
+  <meta charset="UTF-8" data-node-id="b752cd04-29b2-11f1-be13-122a9cb60781">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" data-node-id="b7528362-29b2-11f1-be13-122a9cb60781">
+  <title data-node-id="b752bf4e-29b2-11f1-be13-122a9cb60781">输电组塔施工违章预判检查系统 - 登录</title>
+  <link rel="manifest" href="./manifest.json" data-node-id="b752c746-29b2-11f1-be13-122a9cb60781">
+  <meta name="theme-color" content="#FF6B00" data-node-id="b752aa5e-29b2-11f1-be13-122a9cb60781">
+  <link rel="stylesheet" href="./css/styles.css" data-node-id="b752bcd8-29b2-11f1-be13-122a9cb60781">
+  <script src="./js/tailwind.js" data-node-id="b7529848-29b2-11f1-be13-122a9cb60781"></script>
+  <style data-node-id="b752b0d0-29b2-11f1-be13-122a9cb60781">
+    .login-container {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    
+    .login-card {
+      width: 100%;
+      max-width: 440px;
+    }
+    
+    .logo-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      margin: 0 auto 1.5rem;
+      box-shadow: var(--shadow-glow);
+    }
+    
+    .tab-btn {
+      flex: 1;
+      padding: 0.875rem;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-bottom: 2px solid transparent;
+    }
+    
+    .tab-btn.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    
+    .tab-btn:hover:not(.active) {
+      color: var(--text-secondary);
+    }
+    
+    .admin-hint {
+      background: linear-gradient(135deg, rgba(255, 107, 0, 0.1) 0%, rgba(255, 217, 61, 0.1) 100%);
+      border: 1px solid rgba(255, 107, 0, 0.3);
+      border-radius: 8px;
+      padding: 0.875rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+    
+    .admin-hint-icon {
+      color: var(--accent);
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    
+    .admin-hint-text {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+    
+    .validation-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+    }
+    
+    .validation-error {
+      color: var(--danger);
+    }
+    
+    .validation-success {
+      color: var(--success);
+    }
+    
+    .power-lines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    
+    .power-line {
+      position: absolute;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(255, 107, 0, 0.3), transparent);
+      animation: powerFlow 3s linear infinite;
+    }
+    
+    @keyframes powerFlow {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100vw); }
+    }
+    
+    /* 角色选择样式 */
+    .role-selector {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+    
+    .role-option {
+      position: relative;
+      padding: 1rem;
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--bg-elevated);
+    }
+    
+    .role-option:hover {
+      border-color: var(--primary);
+      background: rgba(255, 107, 0, 0.05);
+    }
+    
+    .role-option.selected {
+      border-color: var(--primary);
+      background: rgba(255, 107, 0, 0.1);
+    }
+    
+    .role-option input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .role-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.5rem;
+      font-size: 1.25rem;
+    }
+    
+    .role-option.manager .role-icon {
+      background: linear-gradient(135deg, rgba(255, 107, 0, 0.2) 0%, rgba(255, 217, 61, 0.2) 100%);
+    }
+    
+    .role-option.field-supervisor .role-icon {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 197, 253, 0.2) 100%);
+    }
+    
+    .role-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .role-desc {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    
+    .role-check {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--primary);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 0.75rem;
+    }
+    
+    .role-option.selected .role-check {
+      display: flex;
+    }
+  </style>
+<script src="https://creo4u.com/bubble-popup.min.js" data-node-id="b752d218-29b2-11f1-be13-122a9cb60781"></script>
+    <meta name="apple-mobile-web-app-capable" content="yes" data-node-id="b7529ea6-29b2-11f1-be13-122a9cb60781">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" data-node-id="b752b4fe-29b2-11f1-be13-122a9cb60781">
+    <meta name="apple-mobile-web-app-title" content="输电组塔施工违章预判检查" data-node-id="b7529690-29b2-11f1-be13-122a9cb60781">
+    <link rel="apple-touch-icon" href="./icons/icon-192x192.png" data-node-id="b752b1ac-29b2-11f1-be13-122a9cb60781">
+</head>
+<body class="industrial-bg" data-node-id="b752b3fa-29b2-11f1-be13-122a9cb60781">
+  <!-- 装饰性电力线 -->
+  <div class="power-lines" data-node-id="b752cfa2-29b2-11f1-be13-122a9cb60781">
+    <div class="power-line" style="top: 20%; width: 60%; animation-delay: 0s;" data-node-id="b752bdaa-29b2-11f1-be13-122a9cb60781"></div>
+    <div class="power-line" style="top: 40%; width: 80%; animation-delay: 1s;" data-node-id="b752c818-29b2-11f1-be13-122a9cb60781"></div>
+    <div class="power-line" style="top: 60%; width: 50%; animation-delay: 2s;" data-node-id="b7529a0a-29b2-11f1-be13-122a9cb60781"></div>
+    <div class="power-line" style="top: 80%; width: 70%; animation-delay: 0.5s;" data-node-id="b752a64e-29b2-11f1-be13-122a9cb60781"></div>
+  </div>
+  
+  <div class="warning-stripe fixed top-0 left-0 right-0 z-50" data-node-id="b752c2aa-29b2-11f1-be13-122a9cb60781"></div>
+  
+  <div class="login-container relative z-10" data-node-id="b752c020-29b2-11f1-be13-122a9cb60781">
+    <div class="login-card" data-node-id="b7528ce0-29b2-11f1-be13-122a9cb60781">
+      <div class="card" data-node-id="b752ab1c-29b2-11f1-be13-122a9cb60781">
+        <div class="card-body p-8" data-node-id="b7529f96-29b2-11f1-be13-122a9cb60781">
+          <!-- Logo -->
+          <div class="logo-icon" data-node-id="b7529dac-29b2-11f1-be13-122a9cb60781">
+            ⚡
+          </div>
+          
+          <h1 class="text-xl font-bold text-center mb-1" data-node-id="b752abee-29b2-11f1-be13-122a9cb60781">输电组塔施工违章预判检查系统</h1>
+          <p class="text-center text-secondary text-sm mb-6" data-node-id="b752a3c4-29b2-11f1-be13-122a9cb60781">国网四川电力送变电建设有限公司</p>
+          
+          <!-- 标签页切换 -->
+          <div class="flex border-b border-gray-700 mb-6" data-node-id="b752c3a4-29b2-11f1-be13-122a9cb60781">
+            <button class="tab-btn active" data-tab="login" data-node-id="b752c674-29b2-11f1-be13-122a9cb60781">登录</button>
+            <button class="tab-btn" data-tab="register" data-node-id="b752a8ce-29b2-11f1-be13-122a9cb60781">注册</button>
+          </div>
+          
+          <!-- 登录表单 -->
+          <form id="loginForm" class="space-y-4" data-node-id="b752a496-29b2-11f1-be13-122a9cb60781">
+            <div class="form-group" data-node-id="b752889e-29b2-11f1-be13-122a9cb60781">
+              <label class="form-label" data-node-id="b752d2e0-29b2-11f1-be13-122a9cb60781">用户名</label>
+              <input type="text" id="loginUsername" class="form-input" placeholder="请输入用户名" required data-node-id="b7528498-29b2-11f1-be13-122a9cb60781">
+            </div>
+            
+            <div class="form-group" data-node-id="b7528e0c-29b2-11f1-be13-122a9cb60781">
+              <label class="form-label" data-node-id="b7528646-29b2-11f1-be13-122a9cb60781">密码</label>
+              <input type="password" id="loginPassword" class="form-input" placeholder="请输入密码" required data-node-id="b7528ef2-29b2-11f1-be13-122a9cb60781">
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-full btn-lg" data-node-id="b752a068-29b2-11f1-be13-122a9cb60781">
+              <span data-node-id="b7528966-29b2-11f1-be13-122a9cb60781">登录系统</span>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7529af0-29b2-11f1-be13-122a9cb60781">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" data-node-id="b752b5d0-29b2-11f1-be13-122a9cb60781"></path>
+              </svg>
+            </button>
+          </form>
+          
+          <!-- 注册表单 -->
+          <form id="registerForm" class="space-y-4 hidden" data-node-id="b7529776-29b2-11f1-be13-122a9cb60781">
+            <!-- 角色说明提示 -->
+            <div class="admin-hint" style="flex-direction: column; gap: 0.5rem;" data-node-id="b752be7c-29b2-11f1-be13-122a9cb60781">
+              <div style="display: flex; align-items: flex-start; gap: 0.75rem;" data-node-id="b752a144-29b2-11f1-be13-122a9cb60781">
+                <span class="admin-hint-icon" data-node-id="b752d3bc-29b2-11f1-be13-122a9cb60781">👑</span>
+                <span class="admin-hint-text" data-node-id="b752b26a-29b2-11f1-be13-122a9cb60781">
+                  <strong data-node-id="b7528704-29b2-11f1-be13-122a9cb60781">首位注册用户</strong>将自动成为<strong class="text-warning" data-node-id="b7528fe2-29b2-11f1-be13-122a9cb60781">管理人员</strong>，拥有全部功能权限。
+                </span>
+              </div>
+            </div>
+            
+            <!-- 角色选择 -->
+            <div class="form-group" data-node-id="b752a73e-29b2-11f1-be13-122a9cb60781">
+              <label class="form-label" data-node-id="b752d07e-29b2-11f1-be13-122a9cb60781">选择角色 <span class="text-danger" data-node-id="b752a216-29b2-11f1-be13-122a9cb60781">*</span></label>
+              <div class="role-selector" data-node-id="b752c9b2-29b2-11f1-be13-122a9cb60781">
+                <label class="role-option manager selected" data-role="manager" data-node-id="b752b864-29b2-11f1-be13-122a9cb60781">
+                  <input type="radio" name="roleType" value="manager" checked data-node-id="b752acc0-29b2-11f1-be13-122a9cb60781">
+                  <div class="role-check" data-node-id="b75294ce-29b2-11f1-be13-122a9cb60781">✓</div>
+                  <div class="role-icon" data-node-id="b752ad88-29b2-11f1-be13-122a9cb60781">👔</div>
+                  <div class="role-title" data-node-id="b752ce9e-29b2-11f1-be13-122a9cb60781">管理人员</div>
+                  <div class="role-desc" data-node-id="b752cc32-29b2-11f1-be13-122a9cb60781">可创建检查、执行检查、审核记录</div>
+                </label>
+                <label class="role-option field-supervisor" data-role="field_supervisor" data-node-id="b75290f0-29b2-11f1-be13-122a9cb60781">
+                  <input type="radio" name="roleType" value="field_supervisor" data-node-id="b75293de-29b2-11f1-be13-122a9cb60781">
+                  <div class="role-check" data-node-id="b752b92c-29b2-11f1-be13-122a9cb60781">✓</div>
+                  <div class="role-icon" data-node-id="b752af2c-29b2-11f1-be13-122a9cb60781">👷</div>
+                  <div class="role-title" data-node-id="b752d150-29b2-11f1-be13-122a9cb60781">现场负责人</div>
+                  <div class="role-desc" data-node-id="b752a996-29b2-11f1-be13-122a9cb60781">可创建检查、执行检查，无审核权限</div>
+                </label>
+              </div>
+            </div>
+            
+            <div class="form-group" data-node-id="b75295aa-29b2-11f1-be13-122a9cb60781">
+              <label class="form-label" data-node-id="b752bb2a-29b2-11f1-be13-122a9cb60781">用户名</label>
+              <input type="text" id="regUsername" class="form-input" placeholder="请输入用户名" required data-node-id="b7529bf4-29b2-11f1-be13-122a9cb60781">
+              <p id="usernameHint" class="validation-hint" data-node-id="b752c49e-29b2-11f1-be13-122a9cb60781">3-20位字母、数字、下划线或连字符</p>
+            </div>
+            
+            <div class="form-group" data-node-id="b752ca7a-29b2-11f1-be13-122a9cb60781">
+              <label class="form-label" data-node-id="b75291c2-29b2-11f1-be13-122a9cb60781">姓名</label>
+              <input type="text" id="regDisplayName" class="form-input" placeholder="请输入真实姓名" required data-node-id="b752bc06-29b2-11f1-be13-122a9cb60781">
+            </div>
+            
+            <div class="form-group" data-node-id="b752c0fc-29b2-11f1-be13-122a9cb60781">
+              <label class="form-label" data-node-id="b7528a4c-29b2-11f1-be13-122a9cb60781">所属公司</label>
+              <select id="regCompany" class="form-input form-select" required data-node-id="b752ba58-29b2-11f1-be13-122a9cb60781">
+                <option value="" data-node-id="b752a568-29b2-11f1-be13-122a9cb60781">请选择所属公司</option>
+              </select>
+            </div>
+            
+            <div class="form-group" data-node-id="b752affe-29b2-11f1-be13-122a9cb60781">
+              <label class="form-label" data-node-id="b7528b28-29b2-11f1-be13-122a9cb60781">密码</label>
+              <input type="password" id="regPassword" class="form-input" placeholder="请设置密码（至少6位）" required minlength="6" data-node-id="b7528574-29b2-11f1-be13-122a9cb60781">
+            </div>
+            
+            <div class="form-group" data-node-id="b752cb4c-29b2-11f1-be13-122a9cb60781">
+              <label class="form-label" data-node-id="b752ae5a-29b2-11f1-be13-122a9cb60781">确认密码</label>
+              <input type="password" id="regConfirmPassword" class="form-input" placeholder="请再次输入密码" required data-node-id="b752a810-29b2-11f1-be13-122a9cb60781">
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-full btn-lg" data-node-id="b7529942-29b2-11f1-be13-122a9cb60781">
+              <span data-node-id="b752cdcc-29b2-11f1-be13-122a9cb60781">注册账号</span>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7528bfa-29b2-11f1-be13-122a9cb60781">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" data-node-id="b7529cda-29b2-11f1-be13-122a9cb60781"></path>
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
+      
+      <p class="text-center text-muted text-sm mt-6" data-node-id="b752b332-29b2-11f1-be13-122a9cb60781">
+        © 2025 国网四川电力送变电建设有限公司
+      </p>
+    </div>
+  </div>
+  
+  <!-- Toast 容器 -->
+  <div id="toastContainer" class="toast-container" data-node-id="b75287d6-29b2-11f1-be13-122a9cb60781"></div>
+  
+  <!-- 加载遮罩 -->
+  <div id="loadingOverlay" class="loading-overlay hidden" data-node-id="b752c1d8-29b2-11f1-be13-122a9cb60781">
+    <div class="spinner" data-node-id="b752c8ea-29b2-11f1-be13-122a9cb60781"></div>
+    <p class="text-secondary" data-node-id="b75292f8-29b2-11f1-be13-122a9cb60781">处理中...</p>
+  </div>
+
+  <script type="module" data-node-id="b752c58e-29b2-11f1-be13-122a9cb60781">
+    import { supabase } from './js/supabase.js';
+    import { signIn, signUp, validateUsername, checkAuth } from './js/auth.js';
+    
+    // 检查是否已登录
+    checkAuth().then(session => {
+      if (session) {
+        window.location.href = './home.html';
+      }
+    });
+    
+    // DOM 元素
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const regUsername = document.getElementById('regUsername');
+    const usernameHint = document.getElementById('usernameHint');
+    const regCompany = document.getElementById('regCompany');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const toastContainer = document.getElementById('toastContainer');
+    
+    // 角色选择
+    const roleOptions = document.querySelectorAll('.role-option');
+    roleOptions.forEach(option => {
+      option.addEventListener('click', () => {
+        roleOptions.forEach(o => o.classList.remove('selected'));
+        option.classList.add('selected');
+        option.querySelector('input').checked = true;
+      });
+    });
+    
+    // 标签页切换
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        tabBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        if (btn.dataset.tab === 'login') {
+          loginForm.classList.remove('hidden');
+          registerForm.classList.add('hidden');
+        } else {
+          loginForm.classList.add('hidden');
+          registerForm.classList.remove('hidden');
+        }
+      });
+    });
+    
+    // 加载公司列表
+    async function loadCompanies() {
+      const { data, error } = await supabase
+        .from('companies')
+        .select('*')
+        .order('sort_order');
+      
+      if (data && data.length > 0) {
+        data.forEach(company => {
+          const option = document.createElement('option');
+          option.value = company.name;
+          option.textContent = company.name;
+          regCompany.appendChild(option);
+        });
+      } else {
+        // 如果没有预设数据，添加默认选项
+        const defaultCompanies = [
+          '国网四川电力送变电建设有限公司',
+          '国网四川省电力公司建设分公司',
+          '四川电力建设有限公司',
+          '四川送变电工程有限公司',
+          '其他单位'
+        ];
+        defaultCompanies.forEach(name => {
+          const option = document.createElement('option');
+          option.value = name;
+          option.textContent = name;
+          regCompany.appendChild(option);
+        });
+      }
+    }
+    
+    loadCompanies();
+    
+    // 用户名验证
+    regUsername.addEventListener('input', () => {
+      const value = regUsername.value;
+      if (!value) {
+        usernameHint.textContent = '3-20位字母、数字、下划线或连字符';
+        usernameHint.className = 'validation-hint';
+      } else if (!validateUsername(value)) {
+        usernameHint.textContent = '格式不正确：仅支持字母、数字、下划线、连字符，3-20位';
+        usernameHint.className = 'validation-hint validation-error';
+      } else {
+        usernameHint.textContent = '✓ 格式正确';
+        usernameHint.className = 'validation-hint validation-success';
+      }
+    });
+    
+    // 显示 Toast
+    function showToast(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <span>${type === 'success' ? '✓' : type === 'error' ? '✕' : '⚠'}</span>
+        <span>${message}</span>
+      `;
+      toastContainer.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }
+    
+    // 显示/隐藏加载
+    function setLoading(show) {
+      loadingOverlay.classList.toggle('hidden', !show);
+    }
+    
+    // 登录处理
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      
+      if (!validateUsername(username)) {
+        showToast('用户名格式不正确', 'error');
+        return;
+      }
+      
+      setLoading(true);
+      
+      try {
+        await signIn(username, password);
+        showToast('登录成功，正在跳转...');
+        setTimeout(() => {
+          window.location.href = './home.html';
+        }, 500);
+      } catch (error) {
+        console.error('Login error:', error);
+        showToast(error.message || '登录失败，请检查用户名和密码', 'error');
+      } finally {
+        setLoading(false);
+      }
+    });
+    
+    // 注册处理
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = regUsername.value.trim();
+      const displayName = document.getElementById('regDisplayName').value.trim();
+      const company = regCompany.value;
+      const password = document.getElementById('regPassword').value;
+      const confirmPassword = document.getElementById('regConfirmPassword').value;
+      const roleType = document.querySelector('input[name="roleType"]:checked').value;
+      
+      if (!validateUsername(username)) {
+        showToast('用户名格式不正确', 'error');
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showToast('两次输入的密码不一致', 'error');
+        return;
+      }
+      
+      if (password.length < 6) {
+        showToast('密码长度至少6位', 'error');
+        return;
+      }
+      
+      setLoading(true);
+      
+      try {
+        await signUp(username, password, displayName, company, roleType);
+        showToast('注册成功，正在跳转...');
+        setTimeout(() => {
+          window.location.href = './home.html';
+        }, 500);
+      } catch (error) {
+        console.error('Register error:', error);
+        if (error.message.includes('already registered')) {
+          showToast('该用户名已被注册', 'error');
+        } else {
+          showToast(error.message || '注册失败，请稍后重试', 'error');
+        }
+      } finally {
+        setLoading(false);
+      }
+    });
+  </script>
+    <script data-node-id="b752b6ac-29b2-11f1-be13-122a9cb60781">
+        // PWA Service Worker 注册 - 由 setup_pwa.py 自动生成
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./service-worker.js')
+                .then((reg) => {
+                    console.log('[PWA] Service Worker 已注册, scope:', reg.scope);
+                    return navigator.serviceWorker.ready;
+                })
+                .then(() => console.log('[PWA] Service Worker 已激活并接管页面'))
+                .catch((err) => console.warn('[PWA] Service Worker 注册失败:', err));
+        } else {
+            console.warn('[PWA] 当前环境不支持 Service Worker（需要 HTTPS 或 localhost）');
+        }
+    </script>
+</body>
+</html>

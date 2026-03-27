@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-node-id="b7502252-29b2-11f1-be13-122a9cb60781">
+<head data-node-id="b750379c-29b2-11f1-be13-122a9cb60781">
+  <meta charset="UTF-8" data-node-id="b7509bce-29b2-11f1-be13-122a9cb60781">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" data-node-id="b7506bc2-29b2-11f1-be13-122a9cb60781">
+  <title data-node-id="b7508bb6-29b2-11f1-be13-122a9cb60781">日计划管理 - 输电组塔施工违章预判检查系统</title>
+  <link rel="manifest" href="./manifest.json" data-node-id="b750a47a-29b2-11f1-be13-122a9cb60781">
+  <meta name="theme-color" content="#FF6B00" data-node-id="b7507a9a-29b2-11f1-be13-122a9cb60781">
+  <link rel="stylesheet" href="./css/styles.css" data-node-id="b7504cfa-29b2-11f1-be13-122a9cb60781">
+  <script src="./js/tailwind.js" data-node-id="b750428c-29b2-11f1-be13-122a9cb60781"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" data-node-id="b7507b62-29b2-11f1-be13-122a9cb60781"></script>
+  <style data-node-id="b7503e5e-29b2-11f1-be13-122a9cb60781">
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 16px;
+      padding: 3rem 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: var(--bg-elevated);
+    }
+    
+    .upload-area:hover,
+    .upload-area.dragover {
+      border-color: var(--primary);
+      background: rgba(255, 107, 0, 0.05);
+    }
+    
+    .upload-area.dragover {
+      transform: scale(1.02);
+    }
+    
+    .upload-icon {
+      width: 80px;
+      height: 80px;
+      margin: 0 auto 1.5rem;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-glow);
+    }
+    
+    .preview-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    
+    .preview-table th,
+    .preview-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .preview-table th {
+      background: var(--bg-elevated);
+      font-weight: 600;
+      color: var(--text-secondary);
+      position: sticky;
+      top: 0;
+    }
+    
+    .preview-table tr:hover {
+      background: rgba(255, 107, 0, 0.05);
+    }
+    
+    .checklist-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .checklist-badge.transmission {
+      background: rgba(255, 107, 0, 0.15);
+      color: var(--primary);
+    }
+    
+    .checklist-badge.substation {
+      background: rgba(52, 152, 219, 0.15);
+      color: var(--info);
+    }
+    
+    .history-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      transition: all 0.2s ease;
+    }
+    
+    .history-card:hover {
+      border-color: var(--primary);
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+    
+    .status-dot.pending { background: var(--warning); }
+    .status-dot.in_progress { background: var(--info); }
+    .status-dot.completed { background: var(--success); }
+    .status-dot.cancelled { background: var(--text-muted); }
+    
+    .tab-container {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+    
+    .tab-btn {
+      padding: 0.75rem 1.5rem;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-elevated);
+    }
+    
+    .tab-btn.active {
+      color: var(--primary);
+      background: var(--bg-elevated);
+    }
+    
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -0.5rem;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--primary);
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+  </style>
+  <script src="https://creo4u.com/bubble-popup.min.js" data-node-id="b7509ca0-29b2-11f1-be13-122a9cb60781"></script>
+</head>
+<body class="industrial-bg" data-node-id="b750b780-29b2-11f1-be13-122a9cb60781">
+  <div class="warning-stripe" data-node-id="b7509282-29b2-11f1-be13-122a9cb60781"></div>
+  
+  <!-- 导航栏 -->
+  <nav class="navbar flex items-center justify-between" data-node-id="b7506064-29b2-11f1-be13-122a9cb60781">
+    <div class="flex items-center gap-3" data-node-id="b7503f30-29b2-11f1-be13-122a9cb60781">
+      <button onclick="goBack()" class="p-2 text-secondary hover:text-primary" data-node-id="b75058a8-29b2-11f1-be13-122a9cb60781">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b750991c-29b2-11f1-be13-122a9cb60781">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" data-node-id="b7509174-29b2-11f1-be13-122a9cb60781"></path>
+        </svg>
+      </button>
+      <div data-node-id="b7507c48-29b2-11f1-be13-122a9cb60781">
+        <h1 class="font-bold text-lg leading-tight" data-node-id="b750a560-29b2-11f1-be13-122a9cb60781">日计划管理</h1>
+        <p class="text-xs text-muted" data-node-id="b7504796-29b2-11f1-be13-122a9cb60781">导入日计划并自动匹配检查清单</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-2" data-node-id="b7502fea-29b2-11f1-be13-122a9cb60781">
+      <span id="userInfo" class="text-sm text-secondary hidden sm:block" data-node-id="b7506c94-29b2-11f1-be13-122a9cb60781"></span>
+    </div>
+  </nav>
+  
+  <main class="p-4 md:p-6 max-w-6xl mx-auto" data-node-id="b75043ae-29b2-11f1-be13-122a9cb60781">
+    <!-- 标签页 -->
+    <div class="tab-container" data-node-id="b7507fcc-29b2-11f1-be13-122a9cb60781">
+      <button class="tab-btn active" data-tab="import" data-node-id="b750ab14-29b2-11f1-be13-122a9cb60781">
+        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7505010-29b2-11f1-be13-122a9cb60781">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" data-node-id="b750b168-29b2-11f1-be13-122a9cb60781"></path>
+        </svg>
+        导入日计划
+      </button>
+      <button class="tab-btn" data-tab="today" data-node-id="b7506d5c-29b2-11f1-be13-122a9cb60781">
+        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7504db8-29b2-11f1-be13-122a9cb60781">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" data-node-id="b750612c-29b2-11f1-be13-122a9cb60781"></path>
+        </svg>
+        当日任务
+        <span id="todayCount" class="ml-2 badge badge-warning hidden" data-node-id="b750a650-29b2-11f1-be13-122a9cb60781">0</span>
+      </button>
+      <button class="tab-btn" data-tab="history" data-node-id="b7506208-29b2-11f1-be13-122a9cb60781">
+        <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b75072de-29b2-11f1-be13-122a9cb60781">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" data-node-id="b75062d0-29b2-11f1-be13-122a9cb60781"></path>
+        </svg>
+        历史记录
+      </button>
+    </div>
+    
+    <!-- 导入日计划 -->
+    <div id="importTab" class="tab-content active" data-node-id="b7508364-29b2-11f1-be13-122a9cb60781">
+      <div class="card mb-6" data-node-id="b750a740-29b2-11f1-be13-122a9cb60781">
+        <div class="card-header" data-node-id="b7508c9c-29b2-11f1-be13-122a9cb60781">
+          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b75030b2-29b2-11f1-be13-122a9cb60781">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" data-node-id="b7502554-29b2-11f1-be13-122a9cb60781"></path>
+          </svg>
+          <h3 class="font-semibold" data-node-id="b7506e2e-29b2-11f1-be13-122a9cb60781">上传Excel文件</h3>
+        </div>
+        <div class="card-body" data-node-id="b7505984-29b2-11f1-be13-122a9cb60781">
+          <div id="uploadArea" class="upload-area" data-node-id="b7504e8a-29b2-11f1-be13-122a9cb60781">
+            <div class="upload-icon" data-node-id="b7509a0c-29b2-11f1-be13-122a9cb60781">
+              <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7508710-29b2-11f1-be13-122a9cb60781">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" data-node-id="b7508d6e-29b2-11f1-be13-122a9cb60781"></path>
+              </svg>
+            </div>
+            <h4 class="text-lg font-semibold mb-2" data-node-id="b7505f88-29b2-11f1-be13-122a9cb60781">拖拽文件到此处或点击上传</h4>
+            <p class="text-secondary text-sm mb-4" data-node-id="b7502a36-29b2-11f1-be13-122a9cb60781">支持 .xlsx, .xls 格式的Excel文件</p>
+            <div class="text-muted text-xs space-y-1" data-node-id="b75041c4-29b2-11f1-be13-122a9cb60781">
+              <p data-node-id="b7502658-29b2-11f1-be13-122a9cb60781">支持两种格式：</p>
+              <p data-node-id="b750529a-29b2-11f1-be13-122a9cb60781">• 标准格式：自动识别包含"分公司"、"项目"、"负责人"的列</p>
+              <p data-node-id="b75035ee-29b2-11f1-be13-122a9cb60781">• 固定列格式：H列(项目实施单位→分公司)、T列(作业计划名称→项目名称)、Z列(工作负责人姓名)</p>
+            </div>
+            <input type="file" id="fileInput" accept=".xlsx,.xls" class="hidden" data-node-id="b750b23a-29b2-11f1-be13-122a9cb60781">
+          </div>
+          
+          <!-- 日期选择 -->
+          <div class="mt-4 flex items-center gap-4" data-node-id="b750afb0-29b2-11f1-be13-122a9cb60781">
+            <div class="form-group mb-0 flex-1" data-node-id="b7507d38-29b2-11f1-be13-122a9cb60781">
+              <label class="form-label" data-node-id="b7507590-29b2-11f1-be13-122a9cb60781">计划日期</label>
+              <input type="date" id="planDate" class="form-input" data-node-id="b7503198-29b2-11f1-be13-122a9cb60781">
+            </div>
+            <div class="flex items-end" data-node-id="b750abe6-29b2-11f1-be13-122a9cb60781">
+              <button id="downloadTemplate" class="btn btn-secondary" data-node-id="b750826a-29b2-11f1-be13-122a9cb60781">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7508ab2-29b2-11f1-be13-122a9cb60781">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" data-node-id="b7505380-29b2-11f1-be13-122a9cb60781"></path>
+                </svg>
+                下载模板
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 预览区域 -->
+      <div id="previewSection" class="card hidden" data-node-id="b7509d5e-29b2-11f1-be13-122a9cb60781">
+        <div class="card-header" data-node-id="b7505a60-29b2-11f1-be13-122a9cb60781">
+          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b750a2a4-29b2-11f1-be13-122a9cb60781">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" data-node-id="b75036c0-29b2-11f1-be13-122a9cb60781"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" data-node-id="b750b096-29b2-11f1-be13-122a9cb60781"></path>
+          </svg>
+          <h3 class="font-semibold" data-node-id="b750b334-29b2-11f1-be13-122a9cb60781">数据预览</h3>
+          <span id="previewCount" class="ml-auto badge badge-info" data-node-id="b750766c-29b2-11f1-be13-122a9cb60781">0 条记录</span>
+        </div>
+        <div class="card-body p-0" data-node-id="b7502b26-29b2-11f1-be13-122a9cb60781">
+          <div class="overflow-x-auto max-h-96" data-node-id="b750342c-29b2-11f1-be13-122a9cb60781">
+            <table class="preview-table" data-node-id="b750a1aa-29b2-11f1-be13-122a9cb60781">
+              <thead data-node-id="b75063ac-29b2-11f1-be13-122a9cb60781">
+                <tr data-node-id="b7504868-29b2-11f1-be13-122a9cb60781">
+                  <th style="width: 50px" data-node-id="b750a38a-29b2-11f1-be13-122a9cb60781">#</th>
+                  <th data-node-id="b7508e2c-29b2-11f1-be13-122a9cb60781">分公司名称</th>
+                  <th data-node-id="b750aeb6-29b2-11f1-be13-122a9cb60781">项目名称</th>
+                  <th data-node-id="b7504476-29b2-11f1-be13-122a9cb60781">工作负责人</th>
+                  <th data-node-id="b75073ba-29b2-11f1-be13-122a9cb60781">匹配清单</th>
+                  <th data-node-id="b7507748-29b2-11f1-be13-122a9cb60781">状态</th>
+                </tr>
+              </thead>
+              <tbody id="previewBody" data-node-id="b7508f08-29b2-11f1-be13-122a9cb60781">
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card-body border-t border-gray-700" data-node-id="b7502c20-29b2-11f1-be13-122a9cb60781">
+          <div class="flex items-center justify-between" data-node-id="b750326a-29b2-11f1-be13-122a9cb60781">
+            <div class="text-sm text-secondary" data-node-id="b7502d1a-29b2-11f1-be13-122a9cb60781">
+              <span class="text-success" data-node-id="b750704a-29b2-11f1-be13-122a9cb60781">✓</span> 系统已自动匹配检查清单类型
+            </div>
+            <div class="flex gap-3" data-node-id="b7502e14-29b2-11f1-be13-122a9cb60781">
+              <button id="cancelImport" class="btn btn-secondary" data-node-id="b7509372-29b2-11f1-be13-122a9cb60781">取消</button>
+              <button id="confirmImport" class="btn btn-primary" data-node-id="b7503878-29b2-11f1-be13-122a9cb60781">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7504548-29b2-11f1-be13-122a9cb60781">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" data-node-id="b7505452-29b2-11f1-be13-122a9cb60781"></path>
+                </svg>
+                确认导入
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 当日任务 -->
+    <div id="todayTab" class="tab-content" data-node-id="b7508454-29b2-11f1-be13-122a9cb60781">
+      <div class="card mb-6" data-node-id="b75080bc-29b2-11f1-be13-122a9cb60781">
+        <div class="card-header" data-node-id="b7508198-29b2-11f1-be13-122a9cb60781">
+          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7507e1e-29b2-11f1-be13-122a9cb60781">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" data-node-id="b750551a-29b2-11f1-be13-122a9cb60781"></path>
+          </svg>
+          <h3 class="font-semibold" data-node-id="b7507824-29b2-11f1-be13-122a9cb60781">当日任务列表</h3>
+          <span id="todayDate" class="ml-auto text-sm text-secondary" data-node-id="b750275c-29b2-11f1-be13-122a9cb60781"></span>
+        </div>
+        <div class="card-body" data-node-id="b750b406-29b2-11f1-be13-122a9cb60781">
+          <!-- 一键清除按钮 -->
+          <div class="flex justify-end mb-4" data-node-id="b7504002-29b2-11f1-be13-122a9cb60781">
+            <button id="clearTodayBtn" class="btn btn-danger btn-sm hidden" onclick="clearTodayPlans()" data-node-id="b7506492-29b2-11f1-be13-122a9cb60781">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b750a812-29b2-11f1-be13-122a9cb60781">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" data-node-id="b7509458-29b2-11f1-be13-122a9cb60781"></path>
+              </svg>
+              一键清除当日所有日计划
+            </button>
+          </div>
+          <div id="todayList" class="space-y-4" data-node-id="b7507144-29b2-11f1-be13-122a9cb60781">
+            <div class="text-center text-muted py-8" data-node-id="b75049a8-29b2-11f1-be13-122a9cb60781">加载中...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 历史记录 -->
+    <div id="historyTab" class="tab-content" data-node-id="b7507496-29b2-11f1-be13-122a9cb60781">
+      <div class="card mb-6" data-node-id="b750ace0-29b2-11f1-be13-122a9cb60781">
+        <div class="card-header" data-node-id="b7502f04-29b2-11f1-be13-122a9cb60781">
+          <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7509548-29b2-11f1-be13-122a9cb60781">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" data-node-id="b7502860-29b2-11f1-be13-122a9cb60781"></path>
+          </svg>
+          <h3 class="font-semibold" data-node-id="b7503954-29b2-11f1-be13-122a9cb60781">导入历史</h3>
+        </div>
+        <div class="card-body" data-node-id="b750b4f6-29b2-11f1-be13-122a9cb60781">
+          <!-- 筛选 -->
+          <div class="flex flex-wrap gap-4 mb-6" data-node-id="b750b5c8-29b2-11f1-be13-122a9cb60781">
+            <div class="form-group mb-0" data-node-id="b7509fe8-29b2-11f1-be13-122a9cb60781">
+              <label class="form-label" data-node-id="b7509e30-29b2-11f1-be13-122a9cb60781">开始日期</label>
+              <input type="date" id="historyDateFrom" class="form-input" data-node-id="b7503a44-29b2-11f1-be13-122a9cb60781">
+            </div>
+            <div class="form-group mb-0" data-node-id="b7504a7a-29b2-11f1-be13-122a9cb60781">
+              <label class="form-label" data-node-id="b7505b32-29b2-11f1-be13-122a9cb60781">结束日期</label>
+              <input type="date" id="historyDateTo" class="form-input" data-node-id="b7502950-29b2-11f1-be13-122a9cb60781">
+            </div>
+            <div class="flex items-end" data-node-id="b7504b4c-29b2-11f1-be13-122a9cb60781">
+              <button id="searchHistory" class="btn btn-primary" data-node-id="b750673a-29b2-11f1-be13-122a9cb60781">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7505c04-29b2-11f1-be13-122a9cb60781">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" data-node-id="b750b6a4-29b2-11f1-be13-122a9cb60781"></path>
+                </svg>
+                查询
+              </button>
+            </div>
+          </div>
+          
+          <div id="historyList" class="space-y-4" data-node-id="b75051c8-29b2-11f1-be13-122a9cb60781">
+            <div class="text-center text-muted py-8" data-node-id="b7507900-29b2-11f1-be13-122a9cb60781">请选择日期范围后查询</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- 管理员端创建检查弹窗 -->
+  <!-- ★ 修复：移除 overflow:hidden，确保 select 下拉可正常交互 -->
+  <div id="adminStartTaskModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(4px);z-index:2000;display:none;align-items:center;justify-content:center;padding:1rem;" data-node-id="b7505cf4-29b2-11f1-be13-122a9cb60781">
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:2rem;width:100%;max-width:480px;position:relative;z-index:2001;overflow:visible;" data-node-id="b750333c-29b2-11f1-be13-122a9cb60781">
+      <div class="flex items-center justify-between mb-6" data-node-id="b7503b2a-29b2-11f1-be13-122a9cb60781">
+        <h3 class="text-xl font-bold" data-node-id="b750a920-29b2-11f1-be13-122a9cb60781">创建并开始检查</h3>
+        <button id="adminCloseModalBtn" class="p-2 text-secondary hover:text-primary" type="button" data-node-id="b750655a-29b2-11f1-be13-122a9cb60781">✕</button>
+      </div>
+      <div class="space-y-4" data-node-id="b7503bf2-29b2-11f1-be13-122a9cb60781">
+        <div style="background:var(--bg-elevated);border-radius:10px;padding:1rem;" class="space-y-2 text-sm" data-node-id="b75087f6-29b2-11f1-be13-122a9cb60781">
+          <div class="flex justify-between" data-node-id="b7508fda-29b2-11f1-be13-122a9cb60781">
+            <span class="text-muted" data-node-id="b75079d2-29b2-11f1-be13-122a9cb60781">项目名称</span>
+            <span id="adminModalProjectName" class="font-medium text-right" style="max-width:60%" data-node-id="b7507ef0-29b2-11f1-be13-122a9cb60781"></span>
+          </div>
+          <div class="flex justify-between" data-node-id="b750851c-29b2-11f1-be13-122a9cb60781">
+            <span class="text-muted" data-node-id="b7509f0c-29b2-11f1-be13-122a9cb60781">工作负责人</span>
+            <span id="adminModalSupervisorName" class="font-medium" data-node-id="b7504f48-29b2-11f1-be13-122a9cb60781"></span>
+          </div>
+          <div class="flex justify-between" data-node-id="b7505dda-29b2-11f1-be13-122a9cb60781">
+            <span class="text-muted" data-node-id="b75088f0-29b2-11f1-be13-122a9cb60781">检查日期</span>
+            <span id="adminModalPlanDate" class="font-medium" data-node-id="b7505600-29b2-11f1-be13-122a9cb60781"></span>
+          </div>
+        </div>
+        <div class="form-group mb-0" data-node-id="b75040de-29b2-11f1-be13-122a9cb60781">
+          <label class="form-label" data-node-id="b75050d8-29b2-11f1-be13-122a9cb60781">所属公司 <span class="text-danger" data-node-id="b750662c-29b2-11f1-be13-122a9cb60781">*</span></label>
+          <select id="adminModalCompanySelect" class="form-input" style="width:100%;cursor:pointer;" data-node-id="b7503cc4-29b2-11f1-be13-122a9cb60781">
+            <option value="" data-node-id="b7503508-29b2-11f1-be13-122a9cb60781">请选择所属公司</option>
+            <option value="输电第一分公司" data-node-id="b7505eb6-29b2-11f1-be13-122a9cb60781">输电第一分公司</option>
+            <option value="输电第二分公司" data-node-id="b75089cc-29b2-11f1-be13-122a9cb60781">输电第二分公司</option>
+            <option value="输电第三分公司" data-node-id="b7506816-29b2-11f1-be13-122a9cb60781">输电第三分公司</option>
+            <option value="变电第一分公司" data-node-id="b750962e-29b2-11f1-be13-122a9cb60781">变电第一分公司</option>
+            <option value="变电第二分公司" data-node-id="b750aa24-29b2-11f1-be13-122a9cb60781">变电第二分公司</option>
+            <option value="建筑分公司" data-node-id="b75068e8-29b2-11f1-be13-122a9cb60781">建筑分公司</option>
+            <option value="调试分公司" data-node-id="b75069c4-29b2-11f1-be13-122a9cb60781">调试分公司</option>
+            <option value="应急抢修中心" data-node-id="b7508602-29b2-11f1-be13-122a9cb60781">应急抢修中心</option>
+          </select>
+        </div>
+        <div id="adminModalChecklistHint" class="hidden" style="background:var(--bg-elevated);border:1px solid var(--border);border-radius:10px;padding:1rem;font-size:0.875rem;" data-node-id="b7506f28-29b2-11f1-be13-122a9cb60781">
+          <p id="adminModalChecklistHintTitle" class="font-medium mb-1" data-node-id="b7504c1e-29b2-11f1-be13-122a9cb60781"></p>
+          <p id="adminModalChecklistHintDesc" class="text-secondary" data-node-id="b7504610-29b2-11f1-be13-122a9cb60781"></p>
+        </div>
+        <!-- 错误提示 -->
+        <div id="adminModalError" class="hidden p-3 rounded-lg text-sm text-danger" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);" data-node-id="b75056e6-29b2-11f1-be13-122a9cb60781"></div>
+        <div class="flex gap-3 pt-2" data-node-id="b7509af2-29b2-11f1-be13-122a9cb60781">
+          <button id="adminConfirmStartBtn" class="btn btn-primary flex-1" disabled type="button" data-node-id="b750975a-29b2-11f1-be13-122a9cb60781">
+            <svg id="adminConfirmBtnIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b75090a2-29b2-11f1-be13-122a9cb60781">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" data-node-id="b750982c-29b2-11f1-be13-122a9cb60781"></path>
+            </svg>
+            <span id="adminConfirmStartBtnText" data-node-id="b7503d96-29b2-11f1-be13-122a9cb60781">创建并开始检查</span>
+          </button>
+          <button id="adminCancelModalBtn" class="btn btn-secondary" type="button" data-node-id="b750a0ba-29b2-11f1-be13-122a9cb60781">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <!-- Toast 容器 -->
+  <div id="toastContainer" class="toast-container" data-node-id="b75046d8-29b2-11f1-be13-122a9cb60781"></div>
+  
+  <!-- 加载遮罩 -->
+  <div id="loadingOverlay" class="loading-overlay hidden" data-node-id="b7506afa-29b2-11f1-be13-122a9cb60781">
+    <div class="spinner" data-node-id="b750720c-29b2-11f1-be13-122a9cb60781"></div>
+    <p class="text-secondary" data-node-id="b750adc6-29b2-11f1-be13-122a9cb60781">处理中...</p>
+  </div>
+
+  <script type="module" data-node-id="b75057c2-29b2-11f1-be13-122a9cb60781">
+    import { supabase } from './js/supabase.js';
+    import { checkAuth, getCurrentUser } from './js/auth.js';
+    
+    // 全局状态
+    let currentUser = null;
+    let isManager = false;
+    let previewData = [];
+    let checklistTypes = {};
+    let branchMappings = {};
+    
+    // DOM 元素
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const toastContainer = document.getElementById('toastContainer');
+    const fileInput = document.getElementById('fileInput');
+    const uploadArea = document.getElementById('uploadArea');
+    const previewSection = document.getElementById('previewSection');
+    const previewBody = document.getElementById('previewBody');
+    const planDateInput = document.getElementById('planDate');
+    
+    // 初始化
+    async function init() {
+      const session = await checkAuth();
+      if (!session) {
+        window.location.href = './index.html';
+        return;
+      }
+      
+      currentUser = await getCurrentUser();
+      if (!currentUser) {
+        window.location.href = './index.html';
+        return;
+      }
+      
+      isManager = currentUser.isManager || currentUser.roleType === 'manager';
+      
+      // 非管理员跳转到我的任务页面
+      if (!isManager) {
+        window.location.href = './my-daily-tasks.html';
+        return;
+      }
+      
+      document.getElementById('userInfo').textContent = currentUser.profile?.display_name || '';
+      
+      // 设置默认日期为今天
+      const today = new Date().toISOString().split('T')[0];
+      planDateInput.value = today;
+      document.getElementById('todayDate').textContent = formatDate(today);
+      document.getElementById('historyDateFrom').value = today;
+      document.getElementById('historyDateTo').value = today;
+      
+      // 加载清单类型和映射
+      await loadChecklistTypes();
+      await loadBranchMappings();
+      
+      // 加载当日任务
+      await loadTodayTasks();
+      
+      setupEventListeners();
+    }
+    
+    init();
+    
+    // 加载清单类型
+    async function loadChecklistTypes() {
+      const { data } = await supabase
+        .from('checklist_types')
+        .select('*')
+        .order('sort_order');
+      
+      if (data) {
+        data.forEach(t => {
+          checklistTypes[t.id] = t;
+        });
+      }
+    }
+    
+    // 加载分公司映射
+    async function loadBranchMappings() {
+      const { data } = await supabase
+        .from('branch_checklist_mapping')
+        .select('*');
+      
+      if (data) {
+        data.forEach(m => {
+          branchMappings[m.branch_name] = m.checklist_type_id;
+        });
+      }
+    }
+    
+    // 根据分公司名称匹配清单类型
+    function matchChecklistType(branchName) {
+      // 精确匹配
+      if (branchMappings[branchName]) {
+        return branchMappings[branchName];
+      }
+      
+      // 模糊匹配
+      if (branchName.includes('输电')) {
+        return Object.keys(checklistTypes).find(id => checklistTypes[id].code === 'transmission');
+      }
+      
+      if (branchName.includes('变电') || branchName.includes('建筑') || 
+          branchName.includes('调试') || branchName.includes('抢修')) {
+        return Object.keys(checklistTypes).find(id => checklistTypes[id].code === 'substation');
+      }
+      
+      // 默认返回输电清单
+      return Object.keys(checklistTypes).find(id => checklistTypes[id].code === 'transmission');
+    }
+    
+    // 设置事件监听
+    function setupEventListeners() {
+      // 标签页切换
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tab = btn.dataset.tab;
+          switchTab(tab);
+        });
+      });
+      
+      // 文件上传
+      uploadArea.addEventListener('click', () => fileInput.click());
+      uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+      });
+      uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+      });
+      uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          handleFile(files[0]);
+        }
+      });
+      
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          handleFile(e.target.files[0]);
+        }
+      });
+      
+      // 下载模板
+      document.getElementById('downloadTemplate').addEventListener('click', downloadTemplate);
+      
+      // 取消导入
+      document.getElementById('cancelImport').addEventListener('click', () => {
+        previewData = [];
+        previewSection.classList.add('hidden');
+        fileInput.value = '';
+      });
+      
+      // 确认导入
+      document.getElementById('confirmImport').addEventListener('click', confirmImport);
+      
+      // 查询历史
+      document.getElementById('searchHistory').addEventListener('click', loadHistory);
+
+      // 管理员端弹窗事件绑定
+      const adminModal = document.getElementById('adminStartTaskModal');
+      const adminCompanySelect = document.getElementById('adminModalCompanySelect');
+      const adminConfirmBtn = document.getElementById('adminConfirmStartBtn');
+      const adminCloseBtn = document.getElementById('adminCloseModalBtn');
+      const adminCancelBtn = document.getElementById('adminCancelModalBtn');
+
+      // 公司选择变化
+      adminCompanySelect.addEventListener('change', onAdminModalCompanyChange);
+      // 确认按钮
+      adminConfirmBtn.addEventListener('click', confirmAdminStartTask);
+      // 关闭按钮
+      if (adminCloseBtn) adminCloseBtn.addEventListener('click', closeAdminStartModal);
+      if (adminCancelBtn) adminCancelBtn.addEventListener('click', closeAdminStartModal);
+      // 点击背景关闭
+      adminModal.addEventListener('click', (e) => {
+        if (e.target === adminModal) closeAdminStartModal();
+      });
+    }
+    
+    // 切换标签页
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+      });
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.toggle('active', content.id === `${tab}Tab`);
+      });
+      
+      if (tab === 'today') {
+        loadTodayTasks();
+      }
+    }
+    
+    // 处理文件
+    async function handleFile(file) {
+      if (!file.name.match(/\.(xlsx|xls)$/i)) {
+        showToast('请上传Excel文件（.xlsx或.xls格式）', 'error');
+        return;
+      }
+      
+      setLoading(true);
+      
+      try {
+        const data = await readExcelFile(file);
+        if (data.length === 0) {
+          showToast('文件中没有有效数据', 'error');
+          return;
+        }
+        
+        // 解析数据
+        previewData = parseExcelData(data);
+        
+        if (previewData.length === 0) {
+          showToast('未找到有效的日计划数据，请检查文件格式', 'error');
+          return;
+        }
+        
+        // 显示预览
+        renderPreview();
+        previewSection.classList.remove('hidden');
+        
+        showToast(`成功解析 ${previewData.length} 条记录`);
+        
+      } catch (error) {
+        console.error('Parse error:', error);
+        showToast('文件解析失败：' + error.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    // 读取Excel文件
+    function readExcelFile(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            // 使用 defval:'' 确保空单元格也填充空字符串，避免Z列等末尾列被截断
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1, defval: '' });
+            resolve(jsonData);
+          } catch (err) {
+            reject(err);
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsArrayBuffer(file);
+      });
+    }
+    
+    // 解析Excel数据
+    // 支持两种模式：
+    // 1. 标准模式：自动识别包含"项目实施单位"、"作业计划名称"、"工作负责人"的列
+    // 2. 固定列模式：H列（项目实施单位→分公司）、T列（作业计划名称→项目名称）、Z列（工作负责人姓名）
+    function parseExcelData(data) {
+      const result = [];
+      
+      // 列索引转换函数（A=0, B=1, ..., Z=25, AA=26...）
+      function colLetterToIndex(letter) {
+        let index = 0;
+        for (let i = 0; i < letter.length; i++) {
+          index = index * 26 + (letter.charCodeAt(i) - 64);
+        }
+        return index - 1;
+      }
+      
+      // 固定列位置（H=7, T=19, Z=25）
+      const FIXED_BRANCH_COL = colLetterToIndex('H');      // H列 = 7（项目实施单位）
+      const FIXED_PROJECT_COL = colLetterToIndex('T');     // T列 = 19（作业计划名称）
+      const FIXED_SUPERVISOR_COL = colLetterToIndex('Z');  // Z列 = 25（工作负责人姓名）
+      
+      // 调试日志：打印前5行的Z列内容，方便调试
+      console.log('[DEBUG] 前5行Z列(索引25)内容:');
+      for (let i = 0; i < Math.min(5, data.length); i++) {
+        const row = data[i];
+        if (row) {
+          console.log(`  行${i}: 长度=${row.length}, Z列内容="${row[FIXED_SUPERVISOR_COL]}", H列="${row[FIXED_BRANCH_COL]}", T列="${row[FIXED_PROJECT_COL]}"`);
+        }
+      }
+      
+      // 查找表头行和列
+      let headerRow = -1;
+      let branchCol = -1;
+      let projectCol = -1;
+      // 工作负责人列默认不设置，将在表头扫描后决定
+      let supervisorCol = -1;
+      
+      // 首先尝试通过表头名称自动识别列位置
+      // 工作负责人列：仅匹配精确等于"工作负责人"四个字，不多不少
+      // 这样可避免匹配到"工作负责人资质不合格"等包含该关键词的内容列
+      for (let i = 0; i < Math.min(15, data.length); i++) {
+        const row = data[i];
+        if (!row) continue;
+        
+        let rowHasHeader = false;
+        for (let j = 0; j < row.length; j++) {
+          const cell = String(row[j] || '').trim();
+          
+          // 匹配分公司列：优先"项目实施单位"，其次"分公司"、"施工单位"等
+          if (cell === '项目实施单位' || cell.includes('项目实施单位')) {
+            branchCol = j;
+            rowHasHeader = true;
+          } else if (branchCol < 0 && (cell.includes('分公司') || cell.includes('施工单位'))) {
+            branchCol = j;
+            rowHasHeader = true;
+          }
+          
+          // 匹配项目列：优先"作业计划名称"，其次"项目名称"、"工程名称"等
+          if (cell === '作业计划名称' || cell.includes('作业计划名称')) {
+            projectCol = j;
+            rowHasHeader = true;
+          } else if (projectCol < 0 && (cell.includes('项目名称') || cell.includes('工程名称') || cell.includes('线路名称'))) {
+            projectCol = j;
+            rowHasHeader = true;
+          }
+          
+          // 匹配负责人列：仅匹配精确等于"工作负责人"四个字，不多不少
+          // 不使用 includes，避免匹配到"工作负责人资质不合格"等内容列
+          if (cell === '工作负责人') {
+            supervisorCol = j;
+            rowHasHeader = true;
+            console.log(`[DEBUG] 表头扫描: 在行${i}列${j}找到精确匹配"工作负责人"`);
+          }
+        }
+        
+        if (rowHasHeader) {
+          headerRow = i;
+        }
+        
+        if (branchCol >= 0 && projectCol >= 0 && supervisorCol >= 0) {
+          break;
+        }
+      }
+      
+      // 工作负责人列处理：最高优先级使用Z列（第25列）
+      // 无论表头扫描是否成功，工作负责人始终使用Z列
+      // 原因：日计划Excel中工作负责人姓名固定在Z列（第25列）
+      const maxCols = Math.max(...data.filter(r => r && r.length > 0).map(r => r.length));
+      if (maxCols > FIXED_SUPERVISOR_COL) {
+        // 数据有Z列，强制使用Z列作为工作负责人列
+        if (supervisorCol !== FIXED_SUPERVISOR_COL) {
+          console.log(`[DEBUG] 工作负责人列覆盖为Z列(索引25)，原匹配列=${supervisorCol === -1 ? '未找到' : supervisorCol}`);
+          supervisorCol = FIXED_SUPERVISOR_COL;
+        } else {
+          console.log(`[DEBUG] 工作负责人列表头匹配结果与Z列一致，使用Z列(索引25)`);
+        }
+      } else if (supervisorCol < 0) {
+        // 数据列数不够且表头未匹配，回退到默认列
+        supervisorCol = 2;
+        console.log('[DEBUG] 数据列数不足Z列，且表头未匹配，回退使用第3列');
+      }
+      
+      // 如果分公司列或项目列自动识别失败，尝试使用固定列模式（H、T列）
+      if (branchCol < 0 || projectCol < 0) {
+        if (maxCols > FIXED_PROJECT_COL) {
+          if (branchCol < 0) {
+            branchCol = FIXED_BRANCH_COL;
+            console.log('[DEBUG] 分公司列未匹配，回退使用H列(索引7)');
+          }
+          if (projectCol < 0) {
+            projectCol = FIXED_PROJECT_COL;
+            console.log('[DEBUG] 项目列未匹配，回退使用T列(索引19)');
+          }
+          
+          // 重新查找表头行：通过H列或T列内容确认
+          if (headerRow < 0) {
+            for (let i = 0; i < Math.min(15, data.length); i++) {
+              const row = data[i];
+              if (!row) continue;
+              const branchVal = String(row[FIXED_BRANCH_COL] || '').trim();
+              const projectVal = String(row[FIXED_PROJECT_COL] || '').trim();
+              if (branchVal.includes('项目实施单位') || branchVal.includes('分公司') || branchVal.includes('单位') ||
+                  projectVal.includes('作业计划名称') || projectVal.includes('项目') || projectVal.includes('作业')) {
+                headerRow = i;
+                console.log(`[DEBUG] 固定列模式找到表头行: 行${i}`);
+                break;
+              }
+            }
+          }
+        } else {
+          // 列数不够，使用默认的前三列
+          branchCol = branchCol >= 0 ? branchCol : 0;
+          projectCol = projectCol >= 0 ? projectCol : 1;
+        }
+      }
+      
+      // 表头行未找到时默认为第0行
+      if (headerRow < 0) {
+        headerRow = 0;
+        console.log('[DEBUG] 未找到表头行，默认使用第0行为表头');
+      }
+      
+      console.log(`[DEBUG] 最终解析配置: 表头行=${headerRow}, 分公司列=${branchCol}(${branchCol===7?'H列':branchCol}), 项目列=${projectCol}(${projectCol===19?'T列':projectCol}), 工作负责人列=${supervisorCol}(${supervisorCol===25?'Z列[最高优先级]':supervisorCol})`);
+      
+      // 解析数据行
+      for (let i = headerRow + 1; i < data.length; i++) {
+        const row = data[i];
+        if (!row) continue;
+        
+        // 确保行数组足够长（使用defval:''  后应该已经足够，但仍做保险处理）
+        const branchName = String(row[branchCol] !== undefined ? row[branchCol] : '').trim();
+        const projectName = String(row[projectCol] !== undefined ? row[projectCol] : '').trim();
+        // Z列读取工作负责人姓名（最高优先级）
+        const rawSupervisor = row[supervisorCol];
+        const supervisorName = String(rawSupervisor !== undefined && rawSupervisor !== null ? rawSupervisor : '').trim();
+        
+        // 跳过空行
+        if (!branchName && !projectName && !supervisorName) continue;
+        
+        // 跳过备注行、说明行、合计行等
+        if (branchName.includes('备注') || branchName.includes('说明') || 
+            branchName.includes('合计') || branchName.includes('总计') ||
+            branchName.includes('序号') || branchName === '序') continue;
+        
+        // 跳过明显不是数据的行
+        if (projectName.includes('备注') || projectName.includes('说明')) continue;
+        
+        const checklistTypeId = matchChecklistType(branchName);
+        const checklistType = checklistTypes[checklistTypeId];
+        
+        result.push({
+          branchName: branchName || '未知分公司',
+          projectName: projectName || '未知项目',
+          supervisorName: supervisorName || '未知负责人',
+          checklistTypeId,
+          checklistTypeName: checklistType?.name || '未知清单',
+          checklistTypeCode: checklistType?.code || 'transmission'
+        });
+      }
+      
+      return result;
+    }
+    
+    // 渲染预览
+    function renderPreview() {
+      document.getElementById('previewCount').textContent = `${previewData.length} 条记录`;
+      
+      previewBody.innerHTML = previewData.map((item, index) => `
+        <tr>
+          <td class="text-muted">${index + 1}</td>
+          <td>${item.branchName}</td>
+          <td>${item.projectName}</td>
+          <td>${item.supervisorName}</td>
+          <td>
+            <span class="checklist-badge ${item.checklistTypeCode}">
+              ${item.checklistTypeCode === 'transmission' ? '⚡' : '🔌'}
+              ${item.checklistTypeName}
+            </span>
+          </td>
+          <td><span class="badge badge-success">待导入</span></td>
+        </tr>
+      `).join('');
+    }
+    
+    // 确认导入
+    async function confirmImport() {
+      if (previewData.length === 0) {
+        showToast('没有可导入的数据', 'error');
+        return;
+      }
+      
+      const planDate = planDateInput.value;
+      if (!planDate) {
+        showToast('请选择计划日期', 'error');
+        return;
+      }
+      
+      setLoading(true);
+      
+      try {
+        // 批量插入日计划
+        const plans = previewData.map(item => ({
+          plan_date: planDate,
+          branch_name: item.branchName,
+          project_name: item.projectName,
+          supervisor_name: item.supervisorName,
+          checklist_type_id: item.checklistTypeId,
+          status: 'pending',
+          imported_by: currentUser.id
+        }));
+        
+        const { data, error } = await supabase
+          .from('daily_plans')
+          .insert(plans)
+          .select();
+        
+        if (error) throw error;
+        
+        // 记录导入批次
+        await supabase.from('daily_plan_imports').insert({
+          import_date: planDate,
+          file_name: fileInput.files[0]?.name || 'unknown.xlsx',
+          total_records: previewData.length,
+          success_records: data.length,
+          failed_records: previewData.length - data.length,
+          imported_by: currentUser.id,
+          import_details: { plans: previewData }
+        });
+        
+        showToast(`成功导入 ${data.length} 条日计划`);
+        
+        // 清空预览
+        previewData = [];
+        previewSection.classList.add('hidden');
+        fileInput.value = '';
+        
+        // 刷新当日任务
+        await loadTodayTasks();
+        
+        // 切换到当日任务标签
+        switchTab('today');
+        
+      } catch (error) {
+        console.error('Import error:', error);
+        showToast('导入失败：' + error.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    // 下载模板
+    function downloadTemplate() {
+      const template = [
+        ['分公司名称', '项目名称', '工作负责人姓名'],
+        ['输电第一分公司', 'XX线路XX标段组塔工程', '张三'],
+        ['输电第二分公司', 'XX线路XX标段组塔工程', '李四'],
+        ['变电第一分公司', 'XX变电站工程', '王五'],
+        ['建筑分公司', 'XX建筑工程', '赵六']
+      ];
+      
+      const ws = XLSX.utils.aoa_to_sheet(template);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, '日计划模板');
+      
+      // 设置列宽
+      ws['!cols'] = [
+        { wch: 20 },
+        { wch: 30 },
+        { wch: 15 }
+      ];
+      
+      XLSX.writeFile(wb, '日计划导入模板.xlsx');
+      showToast('模板下载成功');
+    }
+    
+    // 加载当日任务
+    async function loadTodayTasks() {
+      const today = new Date().toISOString().split('T')[0];
+      
+      const { data: plans, error } = await supabase
+        .from('daily_plans')
+        .select(`
+          *,
+          checklist_types (name, code, total_items),
+          inspection_tasks (id, status, completed_items, total_items)
+        `)
+        .eq('plan_date', today)
+        .order('created_at', { ascending: false });
+      
+      const container = document.getElementById('todayList');
+      
+      if (error) {
+        container.innerHTML = `<div class="text-center text-danger py-8">加载失败：${error.message}</div>`;
+        return;
+      }
+      
+      if (!plans || plans.length === 0) {
+        container.innerHTML = `
+          <div class="text-center text-muted py-12">
+            <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+            </svg>
+            <p>今日暂无日计划</p>
+            <p class="text-sm mt-2">请上传Excel文件导入日计划</p>
+          </div>
+        `;
+        document.getElementById('todayCount').classList.add('hidden');
+        document.getElementById('clearTodayBtn').classList.add('hidden');
+        return;
+      }
+      
+      // 更新计数
+      const pendingCount = plans.filter(p => p.status === 'pending').length;
+      const countBadge = document.getElementById('todayCount');
+      if (pendingCount > 0) {
+        countBadge.textContent = pendingCount;
+        countBadge.classList.remove('hidden');
+      } else {
+        countBadge.classList.add('hidden');
+      }
+      
+      // 显示一键清除按钮
+      document.getElementById('clearTodayBtn').classList.remove('hidden');
+      
+      container.innerHTML = plans.map(plan => {
+        const checklistType = plan.checklist_types;
+        const task = plan.inspection_tasks;
+        
+        return `
+          <div class="history-card">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl ${checklistType?.code === 'transmission' ? 'bg-primary/20' : 'bg-info/20'} flex items-center justify-center flex-shrink-0">
+                  <span class="text-2xl">${checklistType?.code === 'transmission' ? '⚡' : '🔌'}</span>
+                </div>
+                <div>
+                  <h4 class="font-semibold">${plan.project_name}</h4>
+                  <p class="text-sm text-secondary mt-1">
+                    <span class="text-muted">分公司：</span>${plan.branch_name}
+                    <span class="mx-2">·</span>
+                    <span class="text-muted">负责人：</span>${plan.supervisor_name}
+                  </p>
+                  <div class="flex items-center gap-3 mt-2">
+                    <span class="checklist-badge ${checklistType?.code || 'transmission'}">
+                      ${checklistType?.name || '输电组塔施工违章预判清单'}
+                      (${checklistType?.total_items || 60}项)
+                    </span>
+                    <span class="flex items-center gap-1 text-sm">
+                      <span class="status-dot ${plan.status}"></span>
+                      ${getStatusText(plan.status)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-2">
+                ${plan.status === 'pending' ? `
+                  <button class="btn btn-primary btn-sm" onclick="startTask('${plan.id}')">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    开始检查
+                  </button>
+                ` : task ? `
+                  <button class="btn btn-secondary btn-sm" onclick="viewTask('${task.id}')">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                    </svg>
+                    查看详情
+                  </button>
+                ` : ''}
+                
+                ${plan.status === 'pending' ? `
+                  <button class="btn btn-danger btn-sm" onclick="cancelPlan('${plan.id}')">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    // 加载历史记录
+    async function loadHistory() {
+      const dateFrom = document.getElementById('historyDateFrom').value;
+      const dateTo = document.getElementById('historyDateTo').value;
+      
+      if (!dateFrom || !dateTo) {
+        showToast('请选择日期范围', 'error');
+        return;
+      }
+      
+      setLoading(true);
+      
+      try {
+        const { data: imports, error } = await supabase
+          .from('daily_plan_imports')
+          .select('*')
+          .gte('import_date', dateFrom)
+          .lte('import_date', dateTo)
+          .order('created_at', { ascending: false });
+        
+        const container = document.getElementById('historyList');
+        
+        if (error) throw error;
+        
+        if (!imports || imports.length === 0) {
+          container.innerHTML = `
+            <div class="text-center text-muted py-8">
+              该日期范围内没有导入记录
+            </div>
+          `;
+          return;
+        }
+        
+        container.innerHTML = imports.map(imp => `
+          <div class="history-card">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <div class="flex items-center gap-3 mb-2">
+                  <span class="badge badge-info">${formatDate(imp.import_date)}</span>
+                  <span class="text-sm text-muted">${imp.file_name}</span>
+                </div>
+                <div class="flex items-center gap-4 text-sm">
+                  <span class="text-secondary">
+                    总计 <strong class="text-primary">${imp.total_records}</strong> 条
+                  </span>
+                  <span class="text-success">
+                    成功 <strong>${imp.success_records}</strong> 条
+                  </span>
+                  ${imp.failed_records > 0 ? `
+                    <span class="text-danger">
+                      失败 <strong>${imp.failed_records}</strong> 条
+                    </span>
+                  ` : ''}
+                </div>
+              </div>
+              <div class="text-sm text-muted">
+                ${formatDateTime(imp.created_at)}
+              </div>
+            </div>
+          </div>
+        `).join('');
+        
+      } catch (error) {
+        console.error('Load history error:', error);
+        showToast('加载失败：' + error.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    // 公司 -> 清单类型映射（与 my-daily-tasks.html 保持一致）
+    const COMPANY_CHECKLIST_MAP = {
+      '输电第一分公司': { code: 'transmission', name: '输电组塔施工违章预判清单', total: 60 },
+      '输电第二分公司': { code: 'transmission', name: '输电组塔施工违章预判清单', total: 60 },
+      '输电第三分公司': { code: 'transmission', name: '输电组塔施工违章预判清单', total: 60 },
+      '变电第一分公司': { code: 'substation', name: '变电工程违章预判清单', total: 33 },
+      '变电第二分公司': { code: 'substation', name: '变电工程违章预判清单', total: 33 },
+      '建筑分公司':     { code: 'substation', name: '变电工程违章预判清单', total: 33 },
+      '调试分公司':     { code: 'substation', name: '变电工程违章预判清单', total: 33 },
+      '应急抢修中心':   { code: 'substation', name: '变电工程违章预判清单', total: 33 },
+    };
+
+    // 当前待创建的日计划信息（管理员端）
+    let pendingAdminPlanData = null;
+    let isAdminSubmitting = false;
+
+    // 开始检查任务 - 弹出公司确认弹窗
+    window.startTask = async function(planId) {
+      // 获取日计划信息
+      const { data: plan, error: planError } = await supabase
+        .from('daily_plans')
+        .select('*, checklist_types(*)')
+        .eq('id', planId)
+        .single();
+
+      if (planError) {
+        showToast('获取日计划信息失败：' + planError.message, 'error');
+        return;
+      }
+
+      // 弹出公司确认弹窗
+      pendingAdminPlanData = plan;
+      isAdminSubmitting = false;
+
+      document.getElementById('adminModalProjectName').textContent = plan.project_name;
+      document.getElementById('adminModalSupervisorName').textContent = plan.supervisor_name;
+      document.getElementById('adminModalPlanDate').textContent = plan.plan_date;
+
+      // 根据 branch_name 自动预选公司
+      const select = document.getElementById('adminModalCompanySelect');
+      const matched = adminAutoMatchCompany(plan.branch_name || '');
+      select.value = matched || '';
+      onAdminModalCompanyChange();
+
+      // 显示弹窗（使用 flex 显示）
+      const modal = document.getElementById('adminStartTaskModal');
+      modal.style.display = 'flex';
+    };
+
+    // 根据分公司名称自动匹配公司选项
+    function adminAutoMatchCompany(branchName) {
+      if (!branchName) return '';
+      if (COMPANY_CHECKLIST_MAP[branchName]) return branchName;
+      // 包含匹配
+      for (const key of Object.keys(COMPANY_CHECKLIST_MAP)) {
+        if (branchName === key) return key;
+      }
+      for (const key of Object.keys(COMPANY_CHECKLIST_MAP)) {
+        if (branchName.includes(key) || key.includes(branchName)) return key;
+      }
+      // 关键词匹配
+      if (branchName.includes('输电')) {
+        if (branchName.includes('一')) return '输电第一分公司';
+        if (branchName.includes('二')) return '输电第二分公司';
+        if (branchName.includes('三')) return '输电第三分公司';
+        return '输电第一分公司';
+      }
+      if (branchName.includes('变电')) {
+        if (branchName.includes('一')) return '变电第一分公司';
+        if (branchName.includes('二')) return '变电第二分公司';
+        return '变电第一分公司';
+      }
+      if (branchName.includes('建筑')) return '建筑分公司';
+      if (branchName.includes('调试')) return '调试分公司';
+      if (branchName.includes('抢修') || branchName.includes('应急')) return '应急抢修中心';
+      return '';
+    }
+
+    // 管理员端公司选择变化
+    function onAdminModalCompanyChange() {
+      const company = document.getElementById('adminModalCompanySelect').value;
+      const hint = document.getElementById('adminModalChecklistHint');
+      const hintTitle = document.getElementById('adminModalChecklistHintTitle');
+      const hintDesc = document.getElementById('adminModalChecklistHintDesc');
+      const confirmBtn = document.getElementById('adminConfirmStartBtn');
+
+      if (!company) {
+        hint.classList.add('hidden');
+        confirmBtn.disabled = true;
+        return;
+      }
+
+      const info = COMPANY_CHECKLIST_MAP[company];
+      if (info) {
+        hint.classList.remove('hidden');
+        hintTitle.textContent = `已自动匹配：${info.name}（${info.total}项）`;
+        hintDesc.textContent = `${info.code === 'transmission' ? '输电类' : '变电类'}公司，将加载 ${info.total} 项检查清单，适用于${company}`;
+        confirmBtn.disabled = false;
+      } else {
+        hint.classList.add('hidden');
+        confirmBtn.disabled = true;
+      }
+    }
+
+    // 关闭管理员端弹窗
+    function closeAdminStartModal() {
+      const modal = document.getElementById('adminStartTaskModal');
+      modal.style.display = 'none';
+      pendingAdminPlanData = null;
+      isAdminSubmitting = false;
+      
+      const confirmBtn = document.getElementById('adminConfirmStartBtn');
+      const confirmBtnText = document.getElementById('adminConfirmStartBtnText');
+      const confirmBtnIcon = document.getElementById('adminConfirmBtnIcon');
+      const modalError = document.getElementById('adminModalError');
+      
+      confirmBtn.disabled = true;
+      if (confirmBtnText) confirmBtnText.textContent = '创建并开始检查';
+      if (confirmBtnIcon) confirmBtnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>';
+      if (modalError) { modalError.classList.add('hidden'); modalError.textContent = ''; }
+      
+      // 重置公司选择
+      const select = document.getElementById('adminModalCompanySelect');
+      if (select) select.value = '';
+      const hint = document.getElementById('adminModalChecklistHint');
+      if (hint) hint.classList.add('hidden');
+    }
+
+    // 确认创建检查任务（管理员端）
+    // ★ 修复：使用 finally 统一恢复按钮状态，防止卡死
+    async function confirmAdminStartTask() {
+      if (isAdminSubmitting || !pendingAdminPlanData) {
+        console.warn('confirmAdminStartTask: 重复提交或没有待处理数据');
+        return;
+      }
+
+      const company = document.getElementById('adminModalCompanySelect')?.value || '';
+      const modalError = document.getElementById('adminModalError');
+      
+      // 隐藏错误
+      if (modalError) {
+        modalError.classList.add('hidden');
+        modalError.textContent = '';
+      }
+      
+      if (!company) {
+        if (modalError) {
+          modalError.textContent = '请选择所属公司';
+          modalError.classList.remove('hidden');
+        }
+        return;
+      }
+
+      const checklistInfo = COMPANY_CHECKLIST_MAP[company];
+      if (!checklistInfo) {
+        if (modalError) {
+          modalError.textContent = '无法匹配检查清单，请联系管理员';
+          modalError.classList.remove('hidden');
+        }
+        return;
+      }
+
+      isAdminSubmitting = true;
+      const confirmBtn = document.getElementById('adminConfirmStartBtn');
+      const confirmBtnText = document.getElementById('adminConfirmStartBtnText');
+      const confirmBtnIcon = document.getElementById('adminConfirmBtnIcon');
+
+      // 设置按钮加载状态
+      if (confirmBtn) confirmBtn.disabled = true;
+      if (confirmBtnText) confirmBtnText.textContent = '创建中...';
+      if (confirmBtnIcon) confirmBtnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>';
+
+      setLoading(true);
+      let taskCreated = false; // 标记是否成功创建任务（用于 finally 判断是否需要恢复按钮）
+
+      try {
+        const plan = pendingAdminPlanData;
+        
+        console.log('创建任务 - 公司:', company, '清单类型:', checklistInfo.code);
+
+        // ★ 优先使用本地缓存的 checklist_type_id，避免数据库查询失败导致卡顿
+        let checklistTypeId = null;
+        let totalItems = checklistInfo.total;
+        
+        // 尝试从已加载的 checklistTypes 中获取
+        const cachedType = Object.values(checklistTypes || {}).find(t => t.code === checklistInfo.code);
+        if (cachedType) {
+          checklistTypeId = cachedType.id;
+          totalItems = cachedType.total_items || checklistInfo.total;
+          console.log('使用缓存的清单类型:', checklistTypeId, '项数:', totalItems);
+        } else {
+          // 尝试查询数据库（带超时保护）
+          try {
+            const { data: ctData, error: ctError } = await supabase
+              .from('checklist_types')
+              .select('id, total_items')
+              .eq('code', checklistInfo.code)
+              .single();
+            
+            if (!ctError && ctData) {
+              checklistTypeId = ctData.id;
+              totalItems = ctData.total_items || checklistInfo.total;
+              console.log('数据库查询清单类型成功:', checklistTypeId);
+            } else {
+              console.warn('数据库查询清单类型失败，使用本地默认值:', ctError?.message);
+            }
+          } catch (ctErr) {
+            console.warn('清单类型查询异常，使用本地默认值:', ctErr);
+          }
+        }
+
+        // 生成任务编号（带超时保护）
+        let taskNumber;
+        try {
+          const { data: tnData, error: tnError } = await supabase.rpc('generate_task_number');
+          if (tnError) throw new Error('生成任务编号失败：' + tnError.message);
+          taskNumber = tnData;
+        } catch (tnErr) {
+          // 如果 RPC 失败，使用本地生成的编号
+          console.warn('generate_task_number RPC 失败，使用本地编号:', tnErr.message);
+          const now = new Date();
+          taskNumber = `TASK-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${String(Math.floor(Math.random()*9000)+1000)}`;
+        }
+        
+        console.log('任务编号:', taskNumber);
+
+        // 创建检查任务
+        const { data: task, error: taskError } = await supabase
+          .from('inspection_tasks')
+          .insert({
+            task_number: taskNumber,
+            inspector_name: plan.supervisor_name,
+            company_name: company,
+            project_name: plan.project_name,
+            inspection_date: plan.plan_date,
+            created_by: currentUser.id,
+            status: 'draft',
+            total_items: totalItems,
+            checklist_type_id: checklistTypeId
+          })
+          .select('id')
+          .single();
+
+        if (taskError) {
+          let errMsg = '创建检查任务失败';
+          if (taskError.code === '42501') errMsg = '权限不足，请重新登录后重试';
+          else if (taskError.code === '23503') errMsg = '数据关联错误，请联系管理员';
+          else if (taskError.message) errMsg = taskError.message;
+          throw new Error(errMsg);
+        }
+        if (!task || !task.id) throw new Error('创建任务后未能获取任务ID，请重试');
+        
+        console.log('任务创建成功:', task.id);
+        taskCreated = true; // 标记成功
+
+        // 更新日计划状态（不阻塞跳转）
+        supabase
+          .from('daily_plans')
+          .update({ status: 'in_progress', task_id: task.id })
+          .eq('id', plan.id)
+          .then(({ error: updateErr }) => {
+            if (updateErr) console.warn('更新日计划状态失败:', updateErr);
+          });
+
+        showToast('检查任务已创建，正在跳转...');
+        document.getElementById('adminStartTaskModal').style.display = 'none';
+
+        setTimeout(() => {
+          window.location.href = `./inspection.html?id=${task.id}&type=${checklistInfo.code}`;
+        }, 600);
+
+      } catch (error) {
+        console.error('Admin start task error:', error);
+        const errMsg = error.message || '创建任务失败，请重试';
+        if (modalError) {
+          modalError.textContent = '错误：' + errMsg;
+          modalError.classList.remove('hidden');
+        }
+        showToast(errMsg, 'error');
+      } finally {
+        setLoading(false);
+        // ★ 关键修复：无论成功失败，都在 finally 中恢复状态
+        // 只有在任务未成功创建时才恢复按钮（成功后会跳转，不需要恢复）
+        if (!taskCreated) {
+          isAdminSubmitting = false;
+          if (confirmBtn) confirmBtn.disabled = false;
+          if (confirmBtnText) confirmBtnText.textContent = '创建并开始检查';
+          if (confirmBtnIcon) confirmBtnIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>';
+        }
+      }
+    }
+
+        // 查看任务
+    window.viewTask = function(taskId) {
+      window.location.href = `./inspection.html?id=${taskId}`;
+    };
+    
+    // 取消计划
+    window.cancelPlan = async function(planId) {
+      if (!confirm('确定要取消此日计划吗？')) return;
+      
+      setLoading(true);
+      
+      try {
+        const { error } = await supabase
+          .from('daily_plans')
+          .update({
+            status: 'cancelled',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', planId);
+        
+        if (error) throw error;
+        
+        showToast('日计划已取消');
+        await loadTodayTasks();
+        
+      } catch (error) {
+        console.error('Cancel error:', error);
+        showToast('取消失败：' + error.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    // 一键清除当日所有日计划
+    window.clearTodayPlans = async function() {
+      const today = new Date().toISOString().split('T')[0];
+      
+      if (!confirm(`确定要清除 ${today} 的所有日计划吗？\n\n此操作不可恢复，将删除当日全部日计划记录。`)) return;
+      
+      setLoading(true);
+      
+      try {
+        // 删除当日所有日计划
+        const { error } = await supabase
+          .from('daily_plans')
+          .delete()
+          .eq('plan_date', today);
+        
+        if (error) throw error;
+        
+        showToast('当日日计划已全部清除');
+        
+        // 隐藏清除按钮
+        document.getElementById('clearTodayBtn').classList.add('hidden');
+        document.getElementById('todayCount').classList.add('hidden');
+        
+        // 刷新当日任务列表
+        await loadTodayTasks();
+        
+      } catch (error) {
+        console.error('Clear today plans error:', error);
+        showToast('清除失败：' + error.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    // 返回
+    window.goBack = function() {
+      window.location.href = './home.html';
+    };
+    
+    // 辅助函数
+    function getStatusText(status) {
+      const map = {
+        'pending': '待执行',
+        'in_progress': '进行中',
+        'completed': '已完成',
+        'cancelled': '已取消'
+      };
+      return map[status] || status;
+    }
+    
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const date = new Date(dateStr);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+    
+    function formatDateTime(dateStr) {
+      if (!dateStr) return '-';
+      const date = new Date(dateStr);
+      return `${formatDate(dateStr)} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    }
+    
+    // Toast
+    window.showToast = function(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <span>${type === 'success' ? '✓' : type === 'error' ? '✕' : '⚠'}</span>
+        <span>${message}</span>
+      `;
+      toastContainer.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    };
+    
+    // Loading
+    window.setLoading = function(show) {
+      loadingOverlay.classList.toggle('hidden', !show);
+    };
+  </script>
+</body>
+</html>

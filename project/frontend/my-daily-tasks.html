@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-node-id="b753c8ee-29b2-11f1-be13-122a9cb60781">
+<head data-node-id="b753c0ec-29b2-11f1-be13-122a9cb60781">
+  <meta charset="UTF-8" data-node-id="b753e0a4-29b2-11f1-be13-122a9cb60781">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" data-node-id="b753d0d2-29b2-11f1-be13-122a9cb60781">
+  <title data-node-id="b7540a34-29b2-11f1-be13-122a9cb60781">我的日计划任务 - 输电组塔施工违章预判检查系统</title>
+  <link rel="manifest" href="./manifest.json" data-node-id="b753f936-29b2-11f1-be13-122a9cb60781">
+  <meta name="theme-color" content="#FF6B00" data-node-id="b753d1ae-29b2-11f1-be13-122a9cb60781">
+  <link rel="stylesheet" href="./css/styles.css" data-node-id="b753e18a-29b2-11f1-be13-122a9cb60781">
+  <script src="./js/tailwind.js" data-node-id="b753c9d4-29b2-11f1-be13-122a9cb60781"></script>
+  <style data-node-id="b75405ac-29b2-11f1-be13-122a9cb60781">
+    .task-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .task-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--primary);
+    }
+    
+    .task-card.substation::before {
+      background: var(--info);
+    }
+    
+    .task-card:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .task-card.substation:hover {
+      border-color: var(--info);
+    }
+    
+    .checklist-type-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+    
+    .checklist-type-badge.transmission {
+      background: linear-gradient(135deg, rgba(255, 107, 0, 0.15) 0%, rgba(255, 217, 61, 0.15) 100%);
+      color: var(--primary);
+      border: 1px solid rgba(255, 107, 0, 0.3);
+    }
+    
+    .checklist-type-badge.substation {
+      background: linear-gradient(135deg, rgba(52, 152, 219, 0.15) 0%, rgba(155, 89, 182, 0.15) 100%);
+      color: var(--info);
+      border: 1px solid rgba(52, 152, 219, 0.3);
+    }
+    
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.375rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+    
+    .status-indicator.pending {
+      background: rgba(243, 156, 18, 0.15);
+      color: var(--warning);
+    }
+    
+    .status-indicator.in_progress {
+      background: rgba(52, 152, 219, 0.15);
+      color: var(--info);
+    }
+    
+    .status-indicator.completed {
+      background: rgba(46, 204, 113, 0.15);
+      color: var(--success);
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    
+    .status-dot.pending { background: var(--warning); }
+    .status-dot.in_progress { background: var(--info); }
+    .status-dot.completed { background: var(--success); }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .date-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--bg-elevated);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+    
+    .date-nav-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    
+    .date-nav-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    
+    .supervisor-selector {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .supervisor-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    
+    .supervisor-chip {
+      padding: 0.5rem 1rem;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+    }
+    
+    .supervisor-chip:hover {
+      border-color: var(--primary);
+      background: rgba(255, 107, 0, 0.1);
+    }
+    
+    .supervisor-chip.selected {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+    }
+    
+    .empty-state-icon {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 1.5rem;
+      background: var(--bg-elevated);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 创建检查弹窗 - 使用独立样式避免与全局 modal-overlay 冲突 */
+    #startTaskModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+      z-index: 1500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    #startTaskModal.modal-visible {
+      display: flex;
+    }
+    .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+      z-index: 1501;
+    }
+    .checklist-hint {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+    }
+    .checklist-hint.transmission-hint {
+      border-color: rgba(255,107,0,0.4);
+      background: rgba(255,107,0,0.06);
+    }
+    .checklist-hint.substation-hint {
+      border-color: rgba(52,152,219,0.4);
+      background: rgba(52,152,219,0.06);
+    }
+
+    /* 确保 select 下拉在弹窗内可正常点击 */
+    #startTaskModal select,
+    #startTaskModal input,
+    #startTaskModal button {
+      position: relative;
+      z-index: 1502;
+    }
+  </style>
+  <script src="https://creo4u.com/bubble-popup.min.js" data-node-id="b7540ef8-29b2-11f1-be13-122a9cb60781"></script>
+</head>
+<body class="industrial-bg" data-node-id="b753e914-29b2-11f1-be13-122a9cb60781">
+  <div class="warning-stripe" data-node-id="b753e5c2-29b2-11f1-be13-122a9cb60781"></div>
+  
+  <!-- 导航栏 -->
+  <nav class="navbar flex items-center justify-between" data-node-id="b7540ff2-29b2-11f1-be13-122a9cb60781">
+    <div class="flex items-center gap-3" data-node-id="b7540b1a-29b2-11f1-be13-122a9cb60781">
+      <button onclick="goBack()" class="p-2 text-secondary hover:text-primary" data-node-id="b753f652-29b2-11f1-be13-122a9cb60781">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7540c0a-29b2-11f1-be13-122a9cb60781">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" data-node-id="b75410e2-29b2-11f1-be13-122a9cb60781"></path>
+        </svg>
+      </button>
+      <div data-node-id="b753c34e-29b2-11f1-be13-122a9cb60781">
+        <h1 class="font-bold text-lg leading-tight" data-node-id="b7540016-29b2-11f1-be13-122a9cb60781">我的日计划任务</h1>
+        <p class="text-xs text-muted" data-node-id="b753f2e2-29b2-11f1-be13-122a9cb60781">查看分配给您的检查任务</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-3" data-node-id="b753fa1c-29b2-11f1-be13-122a9cb60781">
+      <div class="date-selector" data-node-id="b753e342-29b2-11f1-be13-122a9cb60781">
+        <button class="date-nav-btn" id="prevDateBtn" data-node-id="b753cce0-29b2-11f1-be13-122a9cb60781">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b753dadc-29b2-11f1-be13-122a9cb60781">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" data-node-id="b753b7b4-29b2-11f1-be13-122a9cb60781"></path>
+          </svg>
+        </button>
+        <input type="date" id="selectedDate" class="bg-transparent border-none text-center font-medium" style="width: 130px;" data-node-id="b753d28a-29b2-11f1-be13-122a9cb60781">
+        <button class="date-nav-btn" id="nextDateBtn" data-node-id="b75401b0-29b2-11f1-be13-122a9cb60781">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b753bcfa-29b2-11f1-be13-122a9cb60781">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" data-node-id="b753ec5c-29b2-11f1-be13-122a9cb60781"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+  
+  <main class="p-4 md:p-6 max-w-4xl mx-auto" data-node-id="b753ee3c-29b2-11f1-be13-122a9cb60781">
+    <!-- 负责人选择器（管理员可见） -->
+    <div id="supervisorSelector" class="supervisor-selector hidden" data-node-id="b753cdda-29b2-11f1-be13-122a9cb60781">
+      <div class="flex items-center justify-between" data-node-id="b7540278-29b2-11f1-be13-122a9cb60781">
+        <div data-node-id="b753f3be-29b2-11f1-be13-122a9cb60781">
+          <h3 class="font-semibold" data-node-id="b753dcb2-29b2-11f1-be13-122a9cb60781">选择工作负责人</h3>
+          <p class="text-sm text-secondary mt-1" data-node-id="b753c434-29b2-11f1-be13-122a9cb60781">点击姓名查看该负责人的任务</p>
+        </div>
+        <button id="clearSelection" class="btn btn-secondary btn-sm hidden" data-node-id="b753e9dc-29b2-11f1-be13-122a9cb60781">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b753faee-29b2-11f1-be13-122a9cb60781">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" data-node-id="b753bdcc-29b2-11f1-be13-122a9cb60781"></path>
+          </svg>
+          清除选择
+        </button>
+      </div>
+      <div id="supervisorList" class="supervisor-list" data-node-id="b753b8d6-29b2-11f1-be13-122a9cb60781">
+        <!-- 动态生成 -->
+      </div>
+    </div>
+    
+    <!-- 当前选中的负责人信息 -->
+    <div id="selectedSupervisorInfo" class="card mb-6 hidden" data-node-id="b753e266-29b2-11f1-be13-122a9cb60781">
+      <div class="card-body" data-node-id="b75411b4-29b2-11f1-be13-122a9cb60781">
+        <div class="flex items-center gap-4" data-node-id="b753f760-29b2-11f1-be13-122a9cb60781">
+          <div class="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center" data-node-id="b7540836-29b2-11f1-be13-122a9cb60781">
+            <svg class="w-7 h-7 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b753ced4-29b2-11f1-be13-122a9cb60781">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" data-node-id="b753b9b2-29b2-11f1-be13-122a9cb60781"></path>
+            </svg>
+          </div>
+          <div data-node-id="b753e41e-29b2-11f1-be13-122a9cb60781">
+            <h3 id="supervisorName" class="text-xl font-bold" data-node-id="b753fbde-29b2-11f1-be13-122a9cb60781"></h3>
+            <p class="text-secondary" data-node-id="b753be94-29b2-11f1-be13-122a9cb60781">
+              <span id="taskDate" data-node-id="b753ef0e-29b2-11f1-be13-122a9cb60781"></span> 的检查任务
+            </p>
+          </div>
+          <div class="ml-auto" data-node-id="b753d35c-29b2-11f1-be13-122a9cb60781">
+            <span id="taskCount" class="badge badge-primary text-lg px-4 py-2" data-node-id="b753ba84-29b2-11f1-be13-122a9cb60781">0 项任务</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 任务列表 -->
+    <div id="taskList" class="space-y-4" data-node-id="b753bb4c-29b2-11f1-be13-122a9cb60781">
+      <div class="text-center text-muted py-12" data-node-id="b753c51a-29b2-11f1-be13-122a9cb60781">加载中...</div>
+    </div>
+  </main>
+  
+  <!-- 创建检查确认弹窗 - 使用独立 ID 和样式，避免与全局 modal-overlay 冲突 -->
+  <div id="startTaskModal" data-node-id="b7540d04-29b2-11f1-be13-122a9cb60781">
+    <div class="modal-box" id="startTaskModalBox" data-node-id="b753f1ac-29b2-11f1-be13-122a9cb60781">
+      <div class="flex items-center justify-between mb-6" data-node-id="b753dd84-29b2-11f1-be13-122a9cb60781">
+        <h3 class="text-xl font-bold" data-node-id="b753c63c-29b2-11f1-be13-122a9cb60781">创建并开始检查</h3>
+        <button id="closeModalBtn" class="p-2 text-secondary hover:text-primary" type="button" data-node-id="b753efd6-29b2-11f1-be13-122a9cb60781">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b753f0bc-29b2-11f1-be13-122a9cb60781">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" data-node-id="b753d550-29b2-11f1-be13-122a9cb60781"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="space-y-4" data-node-id="b753de4c-29b2-11f1-be13-122a9cb60781">
+        <!-- 项目信息（只读展示） -->
+        <div style="background:var(--bg-elevated);border-radius:10px;padding:1rem;" class="space-y-2 text-sm" data-node-id="b7540674-29b2-11f1-be13-122a9cb60781">
+          <div class="flex justify-between" data-node-id="b753e4f0-29b2-11f1-be13-122a9cb60781">
+            <span class="text-muted" data-node-id="b753eaa4-29b2-11f1-be13-122a9cb60781">项目名称</span>
+            <span id="modalProjectName" class="font-medium text-right" style="max-width:60%" data-node-id="b753f490-29b2-11f1-be13-122a9cb60781"></span>
+          </div>
+          <div class="flex justify-between" data-node-id="b753c1be-29b2-11f1-be13-122a9cb60781">
+            <span class="text-muted" data-node-id="b753eb76-29b2-11f1-be13-122a9cb60781">工作负责人</span>
+            <span id="modalSupervisorName" class="font-medium" data-node-id="b753d758-29b2-11f1-be13-122a9cb60781"></span>
+          </div>
+          <div class="flex justify-between" data-node-id="b7540340-29b2-11f1-be13-122a9cb60781">
+            <span class="text-muted" data-node-id="b753e838-29b2-11f1-be13-122a9cb60781">检查日期</span>
+            <span id="modalPlanDate" class="font-medium" data-node-id="b753f850-29b2-11f1-be13-122a9cb60781"></span>
+          </div>
+        </div>
+
+        <!-- 所属公司（下拉选择） -->
+        <div class="form-group mb-0" data-node-id="b753c286-29b2-11f1-be13-122a9cb60781">
+          <label class="form-label" data-node-id="b753d64a-29b2-11f1-be13-122a9cb60781">所属公司 <span class="text-danger" data-node-id="b753d456-29b2-11f1-be13-122a9cb60781">*</span></label>
+          <select id="modalCompanySelect" class="form-input form-select" data-node-id="b753c812-29b2-11f1-be13-122a9cb60781">
+            <option value="" data-node-id="b753df1e-29b2-11f1-be13-122a9cb60781">请选择所属公司</option>
+            <option value="输电第一分公司" data-node-id="b753e694-29b2-11f1-be13-122a9cb60781">输电第一分公司</option>
+            <option value="输电第二分公司" data-node-id="b75400e8-29b2-11f1-be13-122a9cb60781">输电第二分公司</option>
+            <option value="输电第三分公司" data-node-id="b753c72c-29b2-11f1-be13-122a9cb60781">输电第三分公司</option>
+            <option value="变电第一分公司" data-node-id="b754094e-29b2-11f1-be13-122a9cb60781">变电第一分公司</option>
+            <option value="变电第二分公司" data-node-id="b753d92e-29b2-11f1-be13-122a9cb60781">变电第二分公司</option>
+            <option value="建筑分公司" data-node-id="b753e766-29b2-11f1-be13-122a9cb60781">建筑分公司</option>
+            <option value="调试分公司" data-node-id="b753bc1e-29b2-11f1-be13-122a9cb60781">调试分公司</option>
+            <option value="应急抢修中心" data-node-id="b753cac4-29b2-11f1-be13-122a9cb60781">应急抢修中心</option>
+          </select>
+        </div>
+
+        <!-- 自动匹配清单提示 -->
+        <div id="modalChecklistHint" class="checklist-hint hidden" data-node-id="b754075a-29b2-11f1-be13-122a9cb60781">
+          <div class="flex items-start gap-2" data-node-id="b75403fe-29b2-11f1-be13-122a9cb60781">
+            <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7540df4-29b2-11f1-be13-122a9cb60781">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" data-node-id="b753bf5c-29b2-11f1-be13-122a9cb60781"></path>
+            </svg>
+            <div data-node-id="b753d852-29b2-11f1-be13-122a9cb60781">
+              <p id="modalChecklistHintTitle" class="font-medium mb-0.5" data-node-id="b7541286-29b2-11f1-be13-122a9cb60781"></p>
+              <p id="modalChecklistHintDesc" class="text-secondary" data-node-id="b753dbc2-29b2-11f1-be13-122a9cb60781"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="flex gap-3 pt-2" data-node-id="b753fca6-29b2-11f1-be13-122a9cb60781">
+          <button id="confirmStartBtn" class="btn btn-primary flex-1" disabled type="button" data-node-id="b753da00-29b2-11f1-be13-122a9cb60781">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b753f56c-29b2-11f1-be13-122a9cb60781">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" data-node-id="b753fd82-29b2-11f1-be13-122a9cb60781"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" data-node-id="b753c024-29b2-11f1-be13-122a9cb60781"></path>
+            </svg>
+            <span id="confirmStartBtnText" data-node-id="b753cbe6-29b2-11f1-be13-122a9cb60781">创建并开始检查</span>
+          </button>
+          <button id="cancelModalBtn" class="btn btn-secondary" type="button" data-node-id="b753cfc4-29b2-11f1-be13-122a9cb60781">取消</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast 容器 -->
+  <div id="toastContainer" class="toast-container" data-node-id="b753fe5e-29b2-11f1-be13-122a9cb60781"></div>
+  
+  <!-- 加载遮罩 -->
+  <div id="loadingOverlay" class="loading-overlay hidden" data-node-id="b753ff3a-29b2-11f1-be13-122a9cb60781">
+    <div class="spinner" data-node-id="b75404c6-29b2-11f1-be13-122a9cb60781"></div>
+    <p class="text-secondary" data-node-id="b753dfdc-29b2-11f1-be13-122a9cb60781">处理中...</p>
+  </div>
+
+  <script type="module" data-node-id="b753ed60-29b2-11f1-be13-122a9cb60781">
+    import { supabase } from './js/supabase.js';
+    import { checkAuth, getCurrentUser } from './js/auth.js';
+    
+    // 全局状态
+    let currentUser = null;
+    let isManager = false;
+    let selectedDate = new Date().toISOString().split('T')[0];
+    let selectedSupervisor = null;
+    let allSupervisors = [];
+    // 当前待创建的日计划信息
+    let pendingPlanData = null;
+    // 防重复提交标志
+    let isSubmitting = false;
+
+    // 公司 -> 清单类型映射
+    const COMPANY_CHECKLIST_MAP = {
+      '输电第一分公司': { code: 'transmission', name: '输电组塔施工违章预判清单', total: 60 },
+      '输电第二分公司': { code: 'transmission', name: '输电组塔施工违章预判清单', total: 60 },
+      '输电第三分公司': { code: 'transmission', name: '输电组塔施工违章预判清单', total: 60 },
+      '变电第一分公司': { code: 'substation', name: '变电工程违章预判清单', total: 33 },
+      '变电第二分公司': { code: 'substation', name: '变电工程违章预判清单', total: 33 },
+      '建筑分公司':     { code: 'substation', name: '变电工程违章预判清单', total: 33 },
+      '调试分公司':     { code: 'substation', name: '变电工程违章预判清单', total: 33 },
+      '应急抢修中心':   { code: 'substation', name: '变电工程违章预判清单', total: 33 },
+    };
+    
+    // DOM 元素
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const toastContainer = document.getElementById('toastContainer');
+    const dateInput = document.getElementById('selectedDate');
+    const taskList = document.getElementById('taskList');
+    const supervisorSelector = document.getElementById('supervisorSelector');
+    const supervisorListEl = document.getElementById('supervisorList');
+    const startTaskModal = document.getElementById('startTaskModal');
+    const modalCompanySelect = document.getElementById('modalCompanySelect');
+    const confirmStartBtn = document.getElementById('confirmStartBtn');
+    const confirmStartBtnText = document.getElementById('confirmStartBtnText');
+    
+    // 初始化
+    async function init() {
+      const session = await checkAuth();
+      if (!session) {
+        window.location.href = './index.html';
+        return;
+      }
+      
+      currentUser = await getCurrentUser();
+      if (!currentUser) {
+        window.location.href = './index.html';
+        return;
+      }
+      
+      isManager = currentUser.isManager || currentUser.roleType === 'manager';
+      
+      // 设置日期
+      dateInput.value = selectedDate;
+      
+      // 管理员显示负责人选择器
+      if (isManager) {
+        supervisorSelector.classList.remove('hidden');
+        await loadSupervisors();
+      } else {
+        // 非管理员直接使用自己的名字
+        selectedSupervisor = currentUser.profile?.display_name;
+        await loadTasks();
+      }
+      
+      setupEventListeners();
+    }
+    
+    init();
+    
+    // 加载负责人列表
+    async function loadSupervisors() {
+      const { data: plans, error } = await supabase
+        .from('daily_plans')
+        .select('supervisor_name')
+        .eq('plan_date', selectedDate);
+      
+      if (error) {
+        console.error('Load supervisors error:', error);
+        return;
+      }
+      
+      // 去重
+      const supervisors = [...new Set(plans?.map(p => p.supervisor_name) || [])];
+      allSupervisors = supervisors;
+      
+      if (supervisors.length === 0) {
+        supervisorListEl.innerHTML = `
+          <div class="text-muted text-sm py-4">该日期暂无日计划数据</div>
+        `;
+        taskList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg class="w-16 h-16 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">暂无日计划</h3>
+            <p class="text-secondary mb-4">该日期没有导入日计划数据</p>
+            <a href="./daily-plan.html" class="btn btn-primary">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+              </svg>
+              导入日计划
+            </a>
+          </div>
+        `;
+        return;
+      }
+      
+      supervisorListEl.innerHTML = supervisors.map(name => `
+        <button class="supervisor-chip ${selectedSupervisor === name ? 'selected' : ''}" 
+                data-name="${escapeAttr(name)}">
+          ${name}
+        </button>
+      `).join('');
+      
+      // 如果没有选中的负责人，显示提示
+      if (!selectedSupervisor) {
+        taskList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg class="w-16 h-16 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">请选择工作负责人</h3>
+            <p class="text-secondary">点击上方的姓名查看该负责人的检查任务</p>
+          </div>
+        `;
+      }
+    }
+    
+    // 加载任务
+    async function loadTasks() {
+      if (!selectedSupervisor) return;
+      
+      setLoading(true);
+      
+      try {
+        const { data: plans, error } = await supabase
+          .from('daily_plans')
+          .select(`
+            *,
+            checklist_types (id, name, code, total_items),
+            inspection_tasks (id, status, completed_items, total_items, problem_items)
+          `)
+          .eq('plan_date', selectedDate)
+          .eq('supervisor_name', selectedSupervisor)
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        // 更新负责人信息
+        document.getElementById('selectedSupervisorInfo').classList.remove('hidden');
+        document.getElementById('supervisorName').textContent = selectedSupervisor;
+        document.getElementById('taskDate').textContent = formatDate(selectedDate);
+        document.getElementById('taskCount').textContent = `${plans?.length || 0} 项任务`;
+        
+        if (!plans || plans.length === 0) {
+          taskList.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">
+                <svg class="w-16 h-16 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-semibold mb-2">暂无检查任务</h3>
+              <p class="text-secondary">${selectedSupervisor} 在 ${formatDate(selectedDate)} 没有分配的检查任务</p>
+            </div>
+          `;
+          return;
+        }
+        
+        taskList.innerHTML = plans.map(plan => {
+          const checklistType = plan.checklist_types;
+          const task = plan.inspection_tasks;
+          // 根据 branch_name 判断类型（日计划中的分公司名称）
+          const branchName = plan.branch_name || '';
+          const isTransmission = branchName.includes('输电') || (checklistType?.code === 'transmission');
+          const cardClass = isTransmission ? 'transmission' : 'substation';
+          const badgeClass = isTransmission ? 'transmission' : 'substation';
+          const badgeIcon = isTransmission ? '⚡' : '🔌';
+          const badgeName = checklistType?.name || (isTransmission ? '输电组塔施工违章预判清单' : '变电工程违章预判清单');
+          const totalItems = checklistType?.total_items || (isTransmission ? 60 : 33);
+          const taskTypeCode = checklistType?.code || (isTransmission ? 'transmission' : 'substation');
+
+          return `
+            <div class="task-card ${cardClass}">
+              <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                <div class="flex-1">
+                  <div class="flex items-center gap-3 mb-3 flex-wrap">
+                    <span class="checklist-type-badge ${badgeClass}">
+                      ${badgeIcon}
+                      ${badgeName}
+                    </span>
+                    <span class="status-indicator ${plan.status}">
+                      <span class="status-dot ${plan.status}"></span>
+                      ${getStatusText(plan.status)}
+                    </span>
+                  </div>
+                  
+                  <h3 class="text-lg font-semibold mb-2">${plan.project_name}</h3>
+                  
+                  <div class="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span class="text-muted">项目实施单位：</span>
+                      <span class="text-secondary">${plan.branch_name}</span>
+                    </div>
+                    <div>
+                      <span class="text-muted">检查项数：</span>
+                      <span class="text-secondary">${totalItems} 项</span>
+                    </div>
+                  </div>
+                  
+                  ${task ? `
+                    <div class="mt-4 p-3 bg-elevated rounded-lg">
+                      <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-muted">检查进度</span>
+                        <span class="text-sm font-mono">${task.completed_items}/${task.total_items}</span>
+                      </div>
+                      <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${task.total_items > 0 ? (task.completed_items / task.total_items * 100).toFixed(0) : 0}%"></div>
+                      </div>
+                      ${task.problem_items > 0 ? `
+                        <div class="mt-2 text-sm text-danger">
+                          发现 ${task.problem_items} 项问题
+                        </div>
+                      ` : ''}
+                    </div>
+                  ` : ''}
+                </div>
+                
+                <div class="flex flex-col gap-2 flex-shrink-0">
+                  ${plan.status === 'pending' ? `
+                    <button class="btn btn-primary start-task-btn"
+                            data-plan-id="${plan.id}"
+                            data-project-name="${escapeAttr(plan.project_name)}"
+                            data-supervisor-name="${escapeAttr(plan.supervisor_name)}"
+                            data-plan-date="${plan.plan_date}"
+                            data-branch-name="${escapeAttr(plan.branch_name)}">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      创建并开始检查
+                    </button>
+                  ` : task ? `
+                    <button class="btn ${task.status === 'draft' ? 'btn-primary' : 'btn-secondary'} view-task-btn"
+                            data-task-id="${task.id}"
+                            data-type="${taskTypeCode}">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        ${task.status === 'draft' ? `
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        ` : `
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        `}
+                      </svg>
+                      ${task.status === 'draft' ? '继续检查' : '查看详情'}
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+        
+      } catch (error) {
+        console.error('Load tasks error:', error);
+        showToast('加载失败：' + error.message, 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    // 转义 HTML 属性中的特殊字符
+    function escapeAttr(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    // 打开创建检查弹窗
+    function openStartModal(planId, projectName, supervisorName, planDate, branchName) {
+      pendingPlanData = { planId, projectName, supervisorName, planDate, branchName };
+      isSubmitting = false;
+
+      document.getElementById('modalProjectName').textContent = projectName;
+      document.getElementById('modalSupervisorName').textContent = supervisorName;
+      document.getElementById('modalPlanDate').textContent = formatDate(planDate);
+
+      // 根据 branch_name 自动预选公司
+      const matched = autoMatchCompany(branchName);
+      modalCompanySelect.value = matched || '';
+      updateChecklistHint();
+
+      // 显示弹窗
+      startTaskModal.classList.add('modal-visible');
+    }
+
+    // 关闭弹窗
+    function closeStartModal() {
+      startTaskModal.classList.remove('modal-visible');
+      pendingPlanData = null;
+      isSubmitting = false;
+      // 重置按钮状态
+      confirmStartBtn.disabled = !modalCompanySelect.value;
+      confirmStartBtnText.textContent = '创建并开始检查';
+    }
+
+    // 根据分公司名称自动匹配公司选项
+    function autoMatchCompany(branchName) {
+      if (!branchName) return '';
+      
+      // 精确匹配
+      if (COMPANY_CHECKLIST_MAP[branchName]) return branchName;
+      
+      // 包含匹配（从 select options 中找）
+      const options = Array.from(modalCompanySelect.options);
+      for (const opt of options) {
+        if (!opt.value) continue;
+        if (branchName === opt.value) return opt.value;
+      }
+      for (const opt of options) {
+        if (!opt.value) continue;
+        if (branchName.includes(opt.value) || opt.value.includes(branchName)) return opt.value;
+      }
+      
+      // 关键词匹配
+      if (branchName.includes('输电')) {
+        if (branchName.includes('一')) return '输电第一分公司';
+        if (branchName.includes('二')) return '输电第二分公司';
+        if (branchName.includes('三')) return '输电第三分公司';
+        return '输电第一分公司';
+      }
+      if (branchName.includes('变电')) {
+        if (branchName.includes('一')) return '变电第一分公司';
+        if (branchName.includes('二')) return '变电第二分公司';
+        return '变电第一分公司';
+      }
+      if (branchName.includes('建筑')) return '建筑分公司';
+      if (branchName.includes('调试')) return '调试分公司';
+      if (branchName.includes('抢修') || branchName.includes('应急')) return '应急抢修中心';
+      
+      return '';
+    }
+
+    // 更新清单提示
+    function updateChecklistHint() {
+      const company = modalCompanySelect.value;
+      const hint = document.getElementById('modalChecklistHint');
+      const hintTitle = document.getElementById('modalChecklistHintTitle');
+      const hintDesc = document.getElementById('modalChecklistHintDesc');
+
+      if (!company) {
+        hint.classList.add('hidden');
+        confirmStartBtn.disabled = true;
+        return;
+      }
+
+      const info = COMPANY_CHECKLIST_MAP[company];
+      if (info) {
+        hint.className = `checklist-hint ${info.code === 'transmission' ? 'transmission-hint' : 'substation-hint'}`;
+        hint.classList.remove('hidden');
+        hintTitle.textContent = `已自动匹配：${info.name}（${info.total}项）`;
+        hintDesc.textContent = `${info.code === 'transmission' ? '输电类' : '变电类'}公司，将加载 ${info.total} 项检查清单，适用于${company}`;
+        confirmStartBtn.disabled = false;
+      } else {
+        hint.classList.add('hidden');
+        confirmStartBtn.disabled = true;
+      }
+    }
+
+    // 确认创建检查任务
+    async function confirmStartTask() {
+      if (isSubmitting) return;
+      if (!pendingPlanData) return;
+
+      const company = modalCompanySelect.value;
+      if (!company) {
+        showToast('请选择所属公司', 'error');
+        return;
+      }
+
+      const checklistInfo = COMPANY_CHECKLIST_MAP[company];
+      if (!checklistInfo) {
+        showToast('无法匹配检查清单，请联系管理员', 'error');
+        return;
+      }
+
+      isSubmitting = true;
+      confirmStartBtn.disabled = true;
+      confirmStartBtnText.textContent = '创建中...';
+
+      setLoading(true);
+
+      try {
+        const { planId, projectName, supervisorName, planDate } = pendingPlanData;
+
+        // 1. 查询对应的 checklist_type_id
+        const { data: ctData, error: ctError } = await supabase
+          .from('checklist_types')
+          .select('id, code, total_items')
+          .eq('code', checklistInfo.code)
+          .single();
+
+        if (ctError) throw new Error('获取清单类型失败：' + ctError.message);
+
+        const checklistTypeId = ctData.id;
+        const totalItems = ctData.total_items || checklistInfo.total;
+
+        // 2. 生成任务编号
+        const { data: taskNumber, error: tnError } = await supabase.rpc('generate_task_number');
+        if (tnError) throw new Error('生成任务编号失败：' + tnError.message);
+
+        // 3. 创建检查任务
+        const { data: task, error: taskError } = await supabase
+          .from('inspection_tasks')
+          .insert({
+            task_number: taskNumber,
+            inspector_name: supervisorName,
+            company_name: company,
+            project_name: projectName,
+            inspection_date: planDate,
+            created_by: currentUser.id,
+            status: 'draft',
+            total_items: totalItems,
+            checklist_type_id: checklistTypeId
+          })
+          .select('id')
+          .single();
+
+        if (taskError) throw new Error('创建检查任务失败：' + taskError.message);
+        if (!task || !task.id) throw new Error('创建任务后未能获取任务ID，请重试');
+
+        // 4. 更新日计划状态（忽略 RLS 导致的更新失败，不阻塞主流程）
+        await supabase
+          .from('daily_plans')
+          .update({
+            status: 'in_progress',
+            task_id: task.id
+          })
+          .eq('id', planId);
+
+        showToast('检查任务已创建，正在跳转...');
+        startTaskModal.classList.remove('modal-visible');
+
+        // 5. 跳转到检查页面
+        setTimeout(() => {
+          window.location.href = `./inspection.html?id=${task.id}&type=${checklistInfo.code}`;
+        }, 500);
+
+      } catch (error) {
+        console.error('Start task error:', error);
+        showToast(error.message || '创建任务失败，请重试', 'error');
+        isSubmitting = false;
+        confirmStartBtn.disabled = false;
+        confirmStartBtnText.textContent = '创建并开始检查';
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    // 查看任务
+    function viewTask(taskId, checklistTypeCode) {
+      const typeParam = checklistTypeCode ? `&type=${checklistTypeCode}` : '';
+      window.location.href = `./inspection.html?id=${taskId}${typeParam}`;
+    }
+    
+    // 设置事件监听
+    function setupEventListeners() {
+      // 日期变化
+      dateInput.addEventListener('change', async (e) => {
+        selectedDate = e.target.value;
+        selectedSupervisor = isManager ? null : currentUser.profile?.display_name;
+        
+        if (isManager) {
+          document.getElementById('clearSelection').classList.add('hidden');
+          document.getElementById('selectedSupervisorInfo').classList.add('hidden');
+          await loadSupervisors();
+        } else {
+          await loadTasks();
+        }
+      });
+
+      // 日期导航按钮
+      document.getElementById('prevDateBtn').addEventListener('click', () => changeDate(-1));
+      document.getElementById('nextDateBtn').addEventListener('click', () => changeDate(1));
+
+      // 负责人列表点击（事件委托）
+      supervisorListEl.addEventListener('click', async (e) => {
+        const chip = e.target.closest('.supervisor-chip');
+        if (!chip) return;
+        const name = chip.dataset.name;
+        if (!name) return;
+        
+        selectedSupervisor = name;
+        document.querySelectorAll('.supervisor-chip').forEach(c => {
+          c.classList.toggle('selected', c.dataset.name === name);
+        });
+        document.getElementById('clearSelection').classList.remove('hidden');
+        await loadTasks();
+      });
+
+      // 清除选择
+      document.getElementById('clearSelection').addEventListener('click', () => {
+        selectedSupervisor = null;
+        document.querySelectorAll('.supervisor-chip').forEach(c => c.classList.remove('selected'));
+        document.getElementById('clearSelection').classList.add('hidden');
+        document.getElementById('selectedSupervisorInfo').classList.add('hidden');
+        taskList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">
+              <svg class="w-16 h-16 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold mb-2">请选择工作负责人</h3>
+            <p class="text-secondary">点击上方的姓名查看该负责人的检查任务</p>
+          </div>
+        `;
+      });
+
+      // 任务列表点击（事件委托）
+      taskList.addEventListener('click', (e) => {
+        // 开始检查按钮
+        const startBtn = e.target.closest('.start-task-btn');
+        if (startBtn) {
+          const { planId, projectName, supervisorName, planDate, branchName } = startBtn.dataset;
+          openStartModal(planId, projectName, supervisorName, planDate, branchName);
+          return;
+        }
+        // 查看任务按钮
+        const viewBtn = e.target.closest('.view-task-btn');
+        if (viewBtn) {
+          viewTask(viewBtn.dataset.taskId, viewBtn.dataset.type);
+          return;
+        }
+      });
+
+      // 弹窗关闭按钮
+      document.getElementById('closeModalBtn').addEventListener('click', closeStartModal);
+      document.getElementById('cancelModalBtn').addEventListener('click', closeStartModal);
+
+      // 点击弹窗背景关闭（仅点击背景层，不影响内部元素）
+      startTaskModal.addEventListener('click', (e) => {
+        if (e.target === startTaskModal) closeStartModal();
+      });
+
+      // 公司选择变化
+      modalCompanySelect.addEventListener('change', updateChecklistHint);
+
+      // 确认按钮
+      confirmStartBtn.addEventListener('click', confirmStartTask);
+    }
+    
+    // 切换日期
+    function changeDate(days) {
+      const date = new Date(selectedDate);
+      date.setDate(date.getDate() + days);
+      selectedDate = date.toISOString().split('T')[0];
+      dateInput.value = selectedDate;
+      
+      selectedSupervisor = isManager ? null : currentUser.profile?.display_name;
+      
+      if (isManager) {
+        document.getElementById('clearSelection').classList.add('hidden');
+        document.getElementById('selectedSupervisorInfo').classList.add('hidden');
+        loadSupervisors();
+      } else {
+        loadTasks();
+      }
+    }
+    
+    // 返回
+    window.goBack = function() {
+      window.location.href = './home.html';
+    };
+    
+    // 辅助函数
+    function getStatusText(status) {
+      const map = {
+        'pending': '待执行',
+        'in_progress': '进行中',
+        'completed': '已完成',
+        'cancelled': '已取消'
+      };
+      return map[status] || status;
+    }
+    
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const date = new Date(dateStr);
+      const weekDays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+      return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日 ${weekDays[date.getDay()]}`;
+    }
+    
+    // Toast
+    window.showToast = function(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <span>${type === 'success' ? '✓' : type === 'error' ? '✗' : '⚠'}</span>
+        <span>${message}</span>
+      `;
+      toastContainer.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    };
+    
+    // Loading
+    window.setLoading = function(show) {
+      loadingOverlay.classList.toggle('hidden', !show);
+    };
+  </script>
+</body>
+</html>

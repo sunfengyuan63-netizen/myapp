@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-node-id="b7521cd8-29b2-11f1-be13-122a9cb60781">
+<head data-node-id="b75214f4-29b2-11f1-be13-122a9cb60781">
+  <meta charset="UTF-8" data-node-id="b75226e2-29b2-11f1-be13-122a9cb60781">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" data-node-id="b752087e-29b2-11f1-be13-122a9cb60781">
+  <title data-node-id="b7521a1c-29b2-11f1-be13-122a9cb60781">输电组塔施工违章预判检查系统</title>
+  <link rel="manifest" href="./manifest.json" data-node-id="b7521e04-29b2-11f1-be13-122a9cb60781">
+  <meta name="theme-color" content="#FF6B00" data-node-id="b751f712-29b2-11f1-be13-122a9cb60781">
+  <link rel="stylesheet" href="./css/styles.css" data-node-id="b75227dc-29b2-11f1-be13-122a9cb60781">
+  <script src="./js/tailwind.js" data-node-id="b751fc44-29b2-11f1-be13-122a9cb60781"></script>
+<script src="https://creo4u.com/bubble-popup.min.js" data-node-id="b7520572-29b2-11f1-be13-122a9cb60781"></script>
+</head>
+<body class="industrial-bg" data-node-id="b75228b8-29b2-11f1-be13-122a9cb60781">
+  <div class="warning-stripe" data-node-id="b75215bc-29b2-11f1-be13-122a9cb60781"></div>
+  
+  <!-- 导航栏 -->
+  <nav class="navbar flex items-center justify-between" data-node-id="b75203ec-29b2-11f1-be13-122a9cb60781">
+    <div class="flex items-center gap-3" data-node-id="b7522e26-29b2-11f1-be13-122a9cb60781">
+      <button id="menuToggle" class="md:hidden p-2 text-secondary hover:text-primary" data-node-id="b7521eea-29b2-11f1-be13-122a9cb60781">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7522980-29b2-11f1-be13-122a9cb60781">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" data-node-id="b7521684-29b2-11f1-be13-122a9cb60781"></path>
+        </svg>
+      </button>
+      <span class="text-2xl" data-node-id="b75200e0-29b2-11f1-be13-122a9cb60781">⚡</span>
+      <div data-node-id="b7521436-29b2-11f1-be13-122a9cb60781">
+        <h1 class="font-bold text-lg leading-tight" data-node-id="b7522336-29b2-11f1-be13-122a9cb60781">违章预判检查系统</h1>
+        <p class="text-xs text-muted hidden sm:block" data-node-id="b7521fd0-29b2-11f1-be13-122a9cb60781">国网四川电力送变电建设有限公司</p>
+      </div>
+    </div>
+    
+    <div class="flex items-center gap-4" data-node-id="b752333a-29b2-11f1-be13-122a9cb60781">
+      <div id="userInfo" class="hidden sm:flex items-center gap-2 text-sm" data-node-id="b7520630-29b2-11f1-be13-122a9cb60781">
+        <span class="text-secondary" id="userName" data-node-id="b752019e-29b2-11f1-be13-122a9cb60781"></span>
+        <span id="managerBadge" class="badge badge-warning hidden" data-node-id="b7520266-29b2-11f1-be13-122a9cb60781">管理人员</span>
+        <span id="supervisorBadge" class="badge badge-info hidden" data-node-id="b7521030-29b2-11f1-be13-122a9cb60781">现场负责人</span>
+      </div>
+      <button id="logoutBtn" class="btn btn-secondary btn-sm" data-node-id="b7520a04-29b2-11f1-be13-122a9cb60781">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b751fdca-29b2-11f1-be13-122a9cb60781">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" data-node-id="b7522f02-29b2-11f1-be13-122a9cb60781"></path>
+        </svg>
+        <span class="hidden sm:inline" data-node-id="b7523402-29b2-11f1-be13-122a9cb60781">退出</span>
+      </button>
+    </div>
+  </nav>
+  
+  <div class="flex" data-node-id="b7522d68-29b2-11f1-be13-122a9cb60781">
+    <!-- 侧边栏 -->
+    <aside id="sidebar" class="sidebar" data-node-id="b752223c-29b2-11f1-be13-122a9cb60781">
+      <div class="p-4 border-b border-gray-700" data-node-id="b752174c-29b2-11f1-be13-122a9cb60781">
+        <div class="text-sm text-muted mb-1" data-node-id="b751ff5a-29b2-11f1-be13-122a9cb60781">当前用户</div>
+        <div id="sidebarUserName" class="font-medium" data-node-id="b752365a-29b2-11f1-be13-122a9cb60781"></div>
+        <div id="sidebarCompany" class="text-sm text-secondary" data-node-id="b751f85c-29b2-11f1-be13-122a9cb60781"></div>
+        <!-- 角色标识 -->
+        <div id="sidebarRoleBadge" class="mt-2" data-node-id="b7522408-29b2-11f1-be13-122a9cb60781"></div>
+      </div>
+      
+      <nav class="py-2" data-node-id="b7522b10-29b2-11f1-be13-122a9cb60781">
+        <!-- 工作台（所有角色可见） -->
+        <div class="sidebar-item active" data-page="dashboard" data-node-id="b75206f8-29b2-11f1-be13-122a9cb60781">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b75234ca-29b2-11f1-be13-122a9cb60781">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" data-node-id="b7520b94-29b2-11f1-be13-122a9cb60781"></path>
+          </svg>
+          <span data-node-id="b751f92e-29b2-11f1-be13-122a9cb60781">工作台</span>
+        </div>
+        
+        <!-- 检查功能菜单（所有角色可见） -->
+        <div id="inspectionMenu" data-node-id="b751fd0c-29b2-11f1-be13-122a9cb60781">
+          <div class="sidebar-item" data-page="new-task" data-node-id="b7520324-29b2-11f1-be13-122a9cb60781">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b752372c-29b2-11f1-be13-122a9cb60781">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" data-node-id="b751f9f6-29b2-11f1-be13-122a9cb60781"></path>
+            </svg>
+            <span data-node-id="b7521b2a-29b2-11f1-be13-122a9cb60781">新建检查</span>
+          </div>
+          
+          <div class="sidebar-item" data-page="my-tasks" data-node-id="b752093c-29b2-11f1-be13-122a9cb60781">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7520acc-29b2-11f1-be13-122a9cb60781">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" data-node-id="b751fabe-29b2-11f1-be13-122a9cb60781"></path>
+            </svg>
+            <span data-node-id="b75207c0-29b2-11f1-be13-122a9cb60781">我的检查</span>
+          </div>
+        </div>
+        
+        <!-- 记录查询（所有角色可见） -->
+        <div class="sidebar-item" data-page="query" data-node-id="b75231a0-29b2-11f1-be13-122a9cb60781">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7520c52-29b2-11f1-be13-122a9cb60781">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" data-node-id="b7520d1a-29b2-11f1-be13-122a9cb60781"></path>
+          </svg>
+          <span data-node-id="b7521864-29b2-11f1-be13-122a9cb60781">记录查询</span>
+        </div>
+        
+        <!-- 日计划功能菜单 -->
+        <div class="px-4 py-2 text-xs text-muted uppercase tracking-wider mt-4" data-node-id="b75230ba-29b2-11f1-be13-122a9cb60781">日计划</div>
+        
+        <div id="dailyPlanMenu" data-node-id="b752136e-29b2-11f1-be13-122a9cb60781">
+          <div class="sidebar-item" data-page="daily-plan" data-node-id="b7521c10-29b2-11f1-be13-122a9cb60781">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b75220a2-29b2-11f1-be13-122a9cb60781">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" data-node-id="b751fe92-29b2-11f1-be13-122a9cb60781"></path>
+            </svg>
+            <span id="dailyPlanMenuText" data-node-id="b7522a48-29b2-11f1-be13-122a9cb60781">日计划管理</span>
+          </div>
+        </div>
+        
+        <!-- 管理人员专属菜单（审核功能） -->
+        <div id="managerMenu" class="hidden" data-node-id="b752216a-29b2-11f1-be13-122a9cb60781">
+          <div class="px-4 py-2 text-xs text-muted uppercase tracking-wider mt-4" data-node-id="b7521116-29b2-11f1-be13-122a9cb60781">管理功能</div>
+          
+          <div class="sidebar-item" data-page="review" data-node-id="b751fb86-29b2-11f1-be13-122a9cb60781">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b75204aa-29b2-11f1-be13-122a9cb60781">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" data-node-id="b7520ea0-29b2-11f1-be13-122a9cb60781"></path>
+            </svg>
+            <span data-node-id="b7523592-29b2-11f1-be13-122a9cb60781">待审核</span>
+            <span id="pendingCount" class="ml-auto badge badge-danger hidden" data-node-id="b7522fde-29b2-11f1-be13-122a9cb60781">0</span>
+          </div>
+
+          <div class="sidebar-item" data-page="all-tasks" data-node-id="b75212a6-29b2-11f1-be13-122a9cb60781">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b7520de2-29b2-11f1-be13-122a9cb60781">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" data-node-id="b75211de-29b2-11f1-be13-122a9cb60781"></path>
+            </svg>
+            <span data-node-id="b7520f68-29b2-11f1-be13-122a9cb60781">全部记录</span>
+          </div>
+        </div>
+      </nav>
+    </aside>
+    
+    <!-- 主内容区 -->
+    <main id="mainContent" class="flex-1 p-4 md:p-6 md:ml-[280px] min-h-screen" data-node-id="b7520022-29b2-11f1-be13-122a9cb60781">
+      <!-- 页面内容将通过 JS 动态加载 -->
+    </main>
+  </div>
+  
+  <!-- Toast 容器 -->
+  <div id="toastContainer" class="toast-container" data-node-id="b7522ca0-29b2-11f1-be13-122a9cb60781"></div>
+  
+  <!-- 加载遮罩 -->
+  <div id="loadingOverlay" class="loading-overlay hidden" data-node-id="b7522bd8-29b2-11f1-be13-122a9cb60781">
+    <div class="spinner" data-node-id="b75224ee-29b2-11f1-be13-122a9cb60781"></div>
+    <p class="text-secondary" data-node-id="b7523272-29b2-11f1-be13-122a9cb60781">处理中...</p>
+  </div>
+
+  <script type="module" data-node-id="b752194a-29b2-11f1-be13-122a9cb60781">
+    import { supabase } from './js/supabase.js';
+    import { checkAuth, getCurrentUser, signOut } from './js/auth.js';
+    import { createNetworkIndicator } from './js/network-indicator.js';
+    import { cacheInspectionData, getNetworkStatus } from './js/sync-manager.js';
+    import { getOfflineTasks, getPendingSyncStats } from './js/offline-storage.js';
+    
+    // 全局状态
+    let currentUser = null;
+    let currentPage = 'dashboard';
+    let isManager = false; // 管理人员
+    
+    // DOM 元素
+    const mainContent = document.getElementById('mainContent');
+    const sidebar = document.getElementById('sidebar');
+    const menuToggle = document.getElementById('menuToggle');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const toastContainer = document.getElementById('toastContainer');
+    
+    // 检查登录状态
+    async function init() {
+      const session = await checkAuth();
+      if (!session) {
+        window.location.href = './index.html';
+        return;
+      }
+      
+      currentUser = await getCurrentUser();
+      if (!currentUser) {
+        window.location.href = './index.html';
+        return;
+      }
+      
+      isManager = currentUser.isManager || currentUser.roleType === 'manager';
+      
+      // 更新用户信息显示
+      document.getElementById('userName').textContent = currentUser.profile?.display_name || currentUser.email;
+      document.getElementById('sidebarUserName').textContent = currentUser.profile?.display_name || currentUser.email;
+      document.getElementById('sidebarCompany').textContent = currentUser.profile?.company_name || '';
+      
+      // 根据角色显示不同的菜单和标识
+      if (isManager) {
+        // 管理人员：显示管理菜单
+        document.getElementById('managerBadge').classList.remove('hidden');
+        document.getElementById('managerMenu').classList.remove('hidden');
+        document.getElementById('sidebarRoleBadge').innerHTML = `
+          <span class="badge badge-warning text-xs">
+            <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+            管理人员
+          </span>
+        `;
+        loadPendingCount();
+      } else {
+        // 现场负责人：隐藏管理菜单
+        document.getElementById('supervisorBadge').classList.remove('hidden');
+        document.getElementById('managerMenu').classList.add('hidden');
+        document.getElementById('sidebarRoleBadge').innerHTML = `
+          <span class="badge badge-info text-xs">
+            <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+            现场负责人
+          </span>
+        `;
+      }
+      
+      // 更新日计划按钮文本
+      const dailyPlanBtnText = document.getElementById('dailyPlanBtnText');
+      if (dailyPlanBtnText) {
+        dailyPlanBtnText.textContent = isManager ? '日计划管理' : '我的日计划任务';
+      }
+      
+      // 检查 URL 参数，支持从日计划跳转时带入公司
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlPage = urlParams.get('page');
+      const urlCompany = urlParams.get('company');
+      
+      if (urlPage === 'new-task') {
+        loadPage('new-task', { company: urlCompany });
+      } else {
+        loadPage('dashboard');
+      }
+      
+      // 初始化网络状态指示器
+      await createNetworkIndicator();
+      
+      // 缓存检查数据供离线使用
+      if (getNetworkStatus()) {
+        cacheInspectionData();
+      }
+    }
+    
+    init();
+    
+    // 加载待审核数量
+    async function loadPendingCount() {
+      const { count } = await supabase
+        .from('inspection_tasks')
+        .select('*', { count: 'exact', head: true })
+        .eq('status', 'submitted');
+      
+      const badge = document.getElementById('pendingCount');
+      if (count > 0) {
+        badge.textContent = count;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+    
+    // 侧边栏切换
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
+    
+    // 点击外部关闭侧边栏
+    document.addEventListener('click', (e) => {
+      if (window.innerWidth < 768 && 
+          !sidebar.contains(e.target) && 
+          !menuToggle.contains(e.target)) {
+        sidebar.classList.remove('open');
+      }
+    });
+    
+    // 根据角色更新日计划菜单文本
+    if (isManager) {
+      document.getElementById('dailyPlanMenuText').textContent = '日计划管理';
+    } else {
+      document.getElementById('dailyPlanMenuText').textContent = '我的日计划任务';
+    }
+    
+    // 侧边栏导航
+    document.querySelectorAll('.sidebar-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const page = item.dataset.page;
+        if (page) {
+          // 日计划页面跳转
+          if (page === 'daily-plan') {
+            if (isManager) {
+              window.location.href = './daily-plan.html';
+            } else {
+              window.location.href = './my-daily-tasks.html';
+            }
+            return;
+          }
+          loadPage(page);
+          sidebar.classList.remove('open');
+        }
+      });
+    });
+    
+    // 退出登录
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await signOut();
+      window.location.href = './index.html';
+    });
+    
+    // 显示 Toast
+    window.showToast = function(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <span>${type === 'success' ? '✓' : type === 'error' ? '✕' : '⚠'}</span>
+        <span>${message}</span>
+      `;
+      toastContainer.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    };
+    
+    // 显示/隐藏加载
+    window.setLoading = function(show) {
+      loadingOverlay.classList.toggle('hidden', !show);
+    };
+    
+    // 获取当前用户
+    window.getCurrentUserData = function() {
+      return currentUser;
+    };
+    
+    // 加载页面
+    async function loadPage(page, pageParams) {
+      // 权限检查：现场负责人不能访问审核相关页面
+      if (!isManager && (page === 'review' || page === 'all-tasks')) {
+        showToast('您没有权限访问此功能，审核功能仅限管理人员使用', 'error');
+        return;
+      }
+      
+      currentPage = page;
+      
+      // 更新侧边栏激活状态
+      document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.page === page);
+      });
+      
+      try {
+        switch (page) {
+          case 'dashboard':
+            await renderDashboard();
+            break;
+          case 'new-task':
+            await renderNewTask(pageParams?.company);
+            break;
+          case 'my-tasks':
+            await renderMyTasks();
+            break;
+          case 'query':
+            await renderQuery();
+            break;
+          case 'review':
+            await renderReview();
+            break;
+          case 'all-tasks':
+            await renderAllTasks();
+            break;
+          default:
+            await renderDashboard();
+        }
+      } catch (err) {
+        console.error(`页面加载失败 [${page}]:`, err);
+        showToast('页面加载失败：' + (err.message || '未知错误'), 'error');
+        // 如果不是 dashboard 则尝试回退到 dashboard
+        if (page !== 'dashboard') {
+          try { await renderDashboard(); } catch(e) { console.error('dashboard 回退失败:', e); }
+        }
+      }
+    }
+    
+    // 暴露给其他模块
+    window.loadPage = loadPage;
+    window.supabase = supabase;
+    
+    // 跳转到日计划页面
+    window.goToDailyPlan = function() {
+      if (isManager) {
+        window.location.href = './daily-plan.html';
+      } else {
+        window.location.href = './my-daily-tasks.html';
+      }
+    };
+    
+    // ==================== 工作台页面 ====================
+    async function renderDashboard() {
+      const displayName = currentUser.profile?.display_name || '用户';
+      const roleText = isManager ? '管理人员' : '现场负责人';
+      
+      mainContent.innerHTML = `
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold mb-2">工作台</h2>
+          <p class="text-secondary">欢迎回来，${displayName}（${roleText}）</p>
+        </div>
+        
+        <!-- 角色说明 -->
+        <div class="card mb-6 border ${isManager ? 'border-warning/30' : 'border-info/30'}">
+          <div class="card-body">
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-full ${isManager ? 'bg-warning/20' : 'bg-info/20'} flex items-center justify-center flex-shrink-0">
+                ${isManager 
+                  ? '<svg class="w-5 h-5 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>'
+                  : '<svg class="w-5 h-5 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>'
+                }
+              </div>
+              <div>
+                <h3 class="font-semibold ${isManager ? 'text-warning' : 'text-info'} mb-1">${roleText}权限说明</h3>
+                <p class="text-sm text-secondary">
+                  ${isManager 
+                    ? '您当前以<strong class="text-warning">管理人员</strong>身份登录。您可以创建检查任务、执行检查、上传佐证资料、记录整改信息，并可以<strong class="text-warning">审核他人提交的检查记录</strong>。'
+                    : '您当前以<strong class="text-info">现场负责人</strong>身份登录。您可以创建检查任务、执行检查、上传佐证资料、记录整改信息。<strong class="text-muted">审核功能仅限管理人员使用。</strong>'
+                  }
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 统计卡片 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <div class="card">
+            <div class="card-body">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-muted text-sm">我的检查</p>
+                  <p id="statMyTasks" class="text-3xl font-bold text-primary mt-1">-</p>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-body">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-muted text-sm">待提交</p>
+                  <p id="statDraft" class="text-3xl font-bold text-warning mt-1">-</p>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-warning/10 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          ${isManager ? `
+            <div class="card">
+              <div class="card-body">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-muted text-sm">待审核</p>
+                    <p id="statPending" class="text-3xl font-bold text-info mt-1">-</p>
+                  </div>
+                  <div class="w-12 h-12 rounded-full bg-info/10 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ` : `
+            <div class="card">
+              <div class="card-body">
+                <div class="flex items-center justify-between">
+                  <div>
+                    <p class="text-muted text-sm">已归档</p>
+                    <p id="statArchived" class="text-3xl font-bold text-success mt-1">-</p>
+                  </div>
+                  <div class="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center">
+                    <svg class="w-6 h-6 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `}
+          
+          <div class="card">
+            <div class="card-body">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-muted text-sm">发现问题</p>
+                  <p id="statProblems" class="text-3xl font-bold text-danger mt-1">-</p>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-danger/10 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="card cursor-pointer hover:border-info transition-colors" onclick="goToDailyPlan()">
+            <div class="card-body">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-muted text-sm">今日计划</p>
+                  <p id="statDailyPlans" class="text-3xl font-bold text-info mt-1">-</p>
+                </div>
+                <div class="w-12 h-12 rounded-full bg-info/10 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 快捷操作 -->
+        <div class="card mb-8">
+          <div class="card-header">
+            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+            </svg>
+            <h3 class="font-semibold">快捷操作</h3>
+          </div>
+          <div class="card-body">
+            <div class="grid grid-cols-1 sm:grid-cols-${isManager ? '4' : '3'} gap-4">
+              <button onclick="loadPage('new-task')" class="btn btn-primary btn-lg justify-start">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                <span>新建检查任务</span>
+              </button>
+              
+              <button onclick="loadPage('my-tasks')" class="btn btn-secondary btn-lg justify-start">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <span>继续未完成检查</span>
+              </button>
+              
+              ${isManager ? `
+                <button onclick="loadPage('review')" class="btn btn-warning btn-lg justify-start">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <span>审核待处理记录</span>
+                </button>
+              ` : ''}
+              
+              <button onclick="loadPage('query')" class="btn btn-secondary btn-lg justify-start">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <span>查询历史记录</span>
+              </button>
+              
+              <button onclick="goToDailyPlan()" class="btn btn-secondary btn-lg justify-start">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+                <span id="dailyPlanBtnText">日计划管理</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 最近检查 -->
+        <div class="card">
+          <div class="card-header">
+            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <h3 class="font-semibold">最近检查</h3>
+          </div>
+          <div class="card-body">
+            <div id="recentTasks" class="space-y-3">
+              <div class="text-center text-muted py-8">加载中...</div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      loadDashboardStats();
+      loadRecentTasks();
+    }
+    
+    // 加载统计数据
+    async function loadDashboardStats() {
+      const userId = currentUser.id;
+      
+      const { count: myTasks } = await supabase
+        .from('inspection_tasks')
+        .select('*', { count: 'exact', head: true })
+        .eq('created_by', userId);
+      
+      const { count: draft } = await supabase
+        .from('inspection_tasks')
+        .select('*', { count: 'exact', head: true })
+        .eq('created_by', userId)
+        .eq('status', 'draft');
+      
+      const { data: tasks } = await supabase
+        .from('inspection_tasks')
+        .select('problem_items')
+        .eq('created_by', userId);
+      
+      const problems = tasks?.reduce((sum, t) => sum + (t.problem_items || 0), 0) || 0;
+      
+      document.getElementById('statMyTasks').textContent = myTasks || 0;
+      document.getElementById('statDraft').textContent = draft || 0;
+      document.getElementById('statProblems').textContent = problems;
+      
+      // 加载今日日计划数量
+      const today = new Date().toISOString().split('T')[0];
+      let dailyPlanQuery = supabase
+        .from('daily_plans')
+        .select('*', { count: 'exact', head: true })
+        .eq('plan_date', today);
+      
+      // 非管理员只看自己的任务
+      if (!isManager && currentUser.profile?.display_name) {
+        dailyPlanQuery = dailyPlanQuery.eq('supervisor_name', currentUser.profile.display_name);
+      }
+      
+      const { count: dailyPlans } = await dailyPlanQuery;
+      document.getElementById('statDailyPlans').textContent = dailyPlans || 0;
+
+      if (isManager) {
+        const { count: pending } = await supabase
+          .from('inspection_tasks')
+          .select('*', { count: 'exact', head: true })
+          .eq('status', 'submitted');
+        document.getElementById('statPending').textContent = pending || 0;
+      } else {
+        const { count: archived } = await supabase
+          .from('inspection_tasks')
+          .select('*', { count: 'exact', head: true })
+          .eq('created_by', userId)
+          .eq('status', 'archived');
+        document.getElementById('statArchived').textContent = archived || 0;
+      }
+    }
+    
+    async function loadRecentTasks() {
+      const { data: tasks } = await supabase
+        .from('inspection_tasks')
+        .select('*')
+        .eq('created_by', currentUser.id)
+        .order('created_at', { ascending: false })
+        .limit(5);
+      
+      const container = document.getElementById('recentTasks');
+      
+      if (!tasks || tasks.length === 0) {
+        container.innerHTML = `
+          <div class="text-center text-muted py-8">
+            <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+            <p>暂无检查记录</p>
+            <button onclick="loadPage('new-task')" class="btn btn-primary btn-sm mt-4">创建第一个检查</button>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = tasks.map(task => `
+        <div class="flex items-center justify-between p-4 bg-elevated rounded-lg hover:bg-border/50 cursor-pointer transition-colors" onclick="openTask('${task.id}')">
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-full ${getStatusBgClass(task.status)} flex items-center justify-center">
+              ${getStatusIcon(task.status)}
+            </div>
+            <div>
+              <p class="font-medium">${task.project_name}</p>
+              <p class="text-sm text-muted">${task.task_number} · ${formatDate(task.inspection_date)}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <span class="badge ${getStatusBadgeClass(task.status)}">${getStatusText(task.status)}</span>
+            <p class="text-sm text-muted mt-1">${task.completed_items}/${task.total_items} 项</p>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // ==================== 新建检查页面 ====================
+    // 公司与清单类型映射
+    const COMPANY_LIST = [
+      '输电第一分公司',
+      '输电第二分公司',
+      '输电第三分公司',
+      '变电第一分公司',
+      '变电第二分公司',
+      '建筑分公司',
+      '调试分公司',
+      '应急抢修中心'
+    ];
+    
+    // 本地清单类型缓存（避免每次都查询数据库）
+    let _checklistTypeMap = null;
+    
+    // ★ 加载日计划中的项目名称列表（用于下拉选择）
+    async function loadDailyPlanProjects() {
+      try {
+        // 获取最近30天的日计划中的项目名称（去重）
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const dateFrom = thirtyDaysAgo.toISOString().split('T')[0];
+        
+        const { data, error } = await supabase
+          .from('daily_plans')
+          .select('id, project_name, branch_name, supervisor_name, plan_date, checklist_type_id, checklist_types(name, code)')
+          .gte('plan_date', dateFrom)
+          .order('plan_date', { ascending: false })
+          .order('project_name');
+        
+        if (error) {
+          console.warn('加载日计划项目列表失败:', error);
+          return [];
+        }
+        
+        // 去重并整理数据
+        const projectMap = new Map();
+        (data || []).forEach(plan => {
+          // 使用 project_name 作为唯一标识，保留最新的记录
+          if (!projectMap.has(plan.project_name)) {
+            projectMap.set(plan.project_name, {
+              id: plan.id,
+              project_name: plan.project_name,
+              branch_name: plan.branch_name,
+              supervisor_name: plan.supervisor_name,
+              plan_date: plan.plan_date,
+              checklist_type_id: plan.checklist_type_id,
+              checklist_type_name: plan.checklist_types?.name || '',
+              checklist_type_code: plan.checklist_types?.code || ''
+            });
+          }
+        });
+        
+        return Array.from(projectMap.values());
+      } catch (err) {
+        console.error('loadDailyPlanProjects error:', err);
+        return [];
+      }
+    }
+    
+    // ★ 根据分公司名称自动匹配公司选项
+    function autoMatchCompanyFromBranch(branchName) {
+      if (!branchName) return '';
+      
+      // 精确匹配
+      if (COMPANY_LIST.includes(branchName)) {
+        return branchName;
+      }
+      
+      // 关键词匹配
+      if (branchName.includes('输电')) {
+        if (branchName.includes('一')) return '输电第一分公司';
+        if (branchName.includes('二')) return '输电第二分公司';
+        if (branchName.includes('三')) return '输电第三分公司';
+        return '输电第一分公司';
+      }
+      if (branchName.includes('变电')) {
+        if (branchName.includes('一')) return '变电第一分公司';
+        if (branchName.includes('二')) return '变电第二分公司';
+        return '变电第一分公司';
+      }
+      if (branchName.includes('建筑')) return '建筑分公司';
+      if (branchName.includes('调试')) return '调试分公司';
+      if (branchName.includes('抢修') || branchName.includes('应急')) return '应急抢修中心';
+      
+      return '';
+    }
+    
+    // 根据公司名称判断清单类型
+    function getChecklistTypeByCompany(companyName) {
+      if (!companyName) return null;
+      if (companyName.includes('输电')) {
+        return 'transmission'; // 输电组塔施工违章预判清单（60项）
+      }
+      return 'substation'; // 变电工程违章预判清单（33项）
+    }
+    
+    // 加载清单类型（带缓存和错误容忍）
+    async function loadChecklistTypeMap() {
+      if (_checklistTypeMap) return _checklistTypeMap;
+      try {
+        const { data, error } = await supabase
+          .from('checklist_types')
+          .select('*');
+        if (error) {
+          console.warn('checklist_types 查询失败，使用本地默认值:', error.message);
+          return {};
+        }
+        _checklistTypeMap = {};
+        (data || []).forEach(t => { _checklistTypeMap[t.code] = t; });
+        return _checklistTypeMap;
+      } catch (err) {
+        console.warn('checklist_types 加载异常，使用本地默认值:', err);
+        return {};
+      }
+    }
+    
+    async function renderNewTask(presetCompany) {
+      const today = new Date().toISOString().split('T')[0];
+      
+      // 确定预设公司（从日计划传入或用户档案）
+      // 修复：只使用从日计划传入的预设公司，不使用用户的 company_name
+      // 因为用户的 company_name 是总公司名称（如"国网四川电力送变电建设有限公司"），不在 COMPANY_LIST 中
+      const defaultCompany = presetCompany || '';
+      const defaultTypeCode = getChecklistTypeByCompany(defaultCompany);
+      
+      const companyOptions = COMPANY_LIST.map(name => 
+        `<option value="${name}" ${name === defaultCompany ? 'selected' : ''}>${name}</option>`
+      ).join('');
+      
+      // ★ 先渲染 HTML，不等待数据库查询，避免阻塞 UI
+      mainContent.innerHTML = `
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold mb-2">新建检查任务</h2>
+          <p class="text-secondary">创建新的违章预判检查任务</p>
+        </div>
+        
+        <div class="card max-w-2xl">
+          <div class="card-header">
+            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <h3 class="font-semibold">检查任务信息</h3>
+          </div>
+          <div class="card-body">
+            <form id="newTaskForm" class="space-y-5" onsubmit="return false;">
+              <div class="form-group">
+                <label class="form-label">检查人员 <span class="text-danger">*</span></label>
+                <input type="text" id="inspectorName" class="form-input" 
+                       value="${(currentUser.profile?.display_name || '').replace(/"/g, '&quot;')}" 
+                       placeholder="请输入检查人员姓名" required>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">所属公司 <span class="text-danger">*</span></label>
+                <select id="companyName" class="form-input form-select" required>
+                  <option value="">请选择所属公司</option>
+                  ${companyOptions}
+                </select>
+                <p class="text-xs text-muted mt-1">输电分公司→60项清单；变电/建筑/调试/应急→33项清单</p>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">项目名称 <span class="text-danger">*</span></label>
+                <div class="relative">
+                  <select id="projectNameSelect" class="form-input form-select">
+                    <option value="">加载中...</option>
+                  </select>
+                  <div id="projectSelectLoading" class="absolute right-10 top-1/2 -translate-y-1/2 hidden">
+                    <svg class="w-4 h-4 animate-spin text-primary" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+                </div>
+                <p class="text-xs text-muted mt-1">从日计划导入的作业计划名称中选择，或手动输入</p>
+                <!-- 手动输入切换 -->
+                <div class="mt-2 flex items-center gap-2">
+                  <input type="checkbox" id="manualProjectInput" class="w-4 h-4 rounded border-gray-600 text-primary focus:ring-primary">
+                  <label for="manualProjectInput" class="text-xs text-secondary cursor-pointer">手动输入项目名称</label>
+                </div>
+                <!-- 手动输入框（默认隐藏） -->
+                <input type="text" id="projectNameManual" class="form-input mt-2 hidden" 
+                       placeholder="请输入项目名称，如：XX线路XX标段">
+              </div>
+              
+              <!-- 选中项目的关联信息 -->
+              <div id="selectedProjectInfo" class="hidden bg-elevated rounded-lg p-4 border border-info/30">
+                <div class="flex items-start gap-3">
+                  <svg class="w-5 h-5 text-info flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <div class="text-sm">
+                    <p class="font-medium text-info mb-1">已关联日计划信息</p>
+                    <div id="selectedProjectDetails" class="text-secondary space-y-1"></div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">检查日期 <span class="text-danger">*</span></label>
+                <input type="date" id="inspectionDate" class="form-input" 
+                       value="${today}" required>
+              </div>
+              
+              <!-- 自动匹配清单提示 -->
+              <div id="checklistInfo" class="bg-elevated rounded-lg p-4 border border-border">
+                <div class="flex items-start gap-3">
+                  <svg class="w-5 h-5 text-info flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  <div class="text-sm text-secondary" id="checklistInfoText">
+                    ${defaultTypeCode
+                      ? `<p class="font-medium text-primary mb-1">已自动匹配检查清单</p><p>将根据公司类型自动选择对应清单</p>`
+                      : '<p class="font-medium text-primary mb-1">检查清单说明</p><p>请选择所属公司，系统将自动匹配对应的检查清单。</p>'
+                    }
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 错误提示区域 -->
+              <div id="formError" class="hidden p-3 bg-danger/10 border border-danger/30 rounded-lg text-sm text-danger"></div>
+              
+              <div class="flex gap-3 pt-4">
+                <button type="button" id="submitNewTaskBtn" class="btn btn-primary flex-1">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                  </svg>
+                  <span>创建并开始检查</span>
+                </button>
+                <button type="button" id="cancelNewTaskBtn" class="btn btn-secondary">取消</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+      
+      // ★ 加载日计划中的项目名称列表
+      let dailyPlanProjects = [];
+      loadDailyPlanProjects().then(projects => {
+        dailyPlanProjects = projects;
+        const projectSelect = document.getElementById('projectNameSelect');
+        if (projectSelect) {
+          if (projects.length > 0) {
+            projectSelect.innerHTML = `
+              <option value="">请选择项目名称（共 ${projects.length} 个）</option>
+              ${projects.map(p => `<option value="${p.id}" data-project="${encodeURIComponent(JSON.stringify(p))}">${p.project_name}</option>`).join('')}
+            `;
+          } else {
+            projectSelect.innerHTML = `<option value="">暂无日计划数据，请手动输入</option>`;
+            // 自动切换到手动输入模式
+            const manualCheckbox = document.getElementById('manualProjectInput');
+            if (manualCheckbox) {
+              manualCheckbox.checked = true;
+              manualCheckbox.dispatchEvent(new Event('change'));
+            }
+          }
+        }
+      });
+      
+      // ★ 手动输入切换事件
+      document.getElementById('manualProjectInput').addEventListener('change', (e) => {
+        const isManual = e.target.checked;
+        const selectEl = document.getElementById('projectNameSelect');
+        const manualEl = document.getElementById('projectNameManual');
+        const infoEl = document.getElementById('selectedProjectInfo');
+        
+        if (isManual) {
+          selectEl.classList.add('hidden');
+          manualEl.classList.remove('hidden');
+          infoEl.classList.add('hidden');
+        } else {
+          selectEl.classList.remove('hidden');
+          manualEl.classList.add('hidden');
+          // 如果有选中的项目，显示关联信息
+          if (selectEl.value) {
+            selectEl.dispatchEvent(new Event('change'));
+          }
+        }
+      });
+      
+      // ★ 项目选择变化事件
+      document.getElementById('projectNameSelect').addEventListener('change', (e) => {
+        const selectedOption = e.target.selectedOptions[0];
+        const infoEl = document.getElementById('selectedProjectInfo');
+        const detailsEl = document.getElementById('selectedProjectDetails');
+        
+        if (selectedOption && selectedOption.dataset.project) {
+          try {
+            const project = JSON.parse(decodeURIComponent(selectedOption.dataset.project));
+            infoEl.classList.remove('hidden');
+            detailsEl.innerHTML = `
+              <p><span class="text-muted">分公司：</span>${project.branch_name || '-'}</p>
+              <p><span class="text-muted">工作负责人：</span>${project.supervisor_name || '-'}</p>
+              <p><span class="text-muted">计划日期：</span>${project.plan_date || '-'}</p>
+              ${project.checklist_type_name ? `<p><span class="text-muted">清单类型：</span>${project.checklist_type_name}</p>` : ''}
+            `;
+            
+            // 如果项目有关联的分公司，自动匹配公司选择
+            if (project.branch_name) {
+              const companySelect = document.getElementById('companyName');
+              const matchedCompany = autoMatchCompanyFromBranch(project.branch_name);
+              if (matchedCompany && companySelect) {
+                companySelect.value = matchedCompany;
+                companySelect.dispatchEvent(new Event('change'));
+              }
+            }
+          } catch (err) {
+            console.warn('解析项目信息失败:', err);
+            infoEl.classList.add('hidden');
+          }
+        } else {
+          infoEl.classList.add('hidden');
+        }
+      });
+      
+      // ★ HTML 渲染完成后，异步加载清单类型数据（不阻塞 UI）
+      loadChecklistTypeMap().then(checklistTypeMap => {
+        // 更新默认公司的清单提示
+        if (defaultCompany && defaultTypeCode) {
+          const type = checklistTypeMap[defaultTypeCode];
+          const infoText = document.getElementById('checklistInfoText');
+          if (infoText && type) {
+            infoText.innerHTML = `<p class="font-medium text-primary mb-1">已自动匹配检查清单</p><p>将使用【${type.name}】（${type.total_items}项）</p>`;
+          }
+        }
+      });
+      
+      // ★ 取消按钮
+      document.getElementById('cancelNewTaskBtn').addEventListener('click', () => {
+        loadPage('dashboard');
+      });
+      
+      // ★ 公司选择变化时自动更新清单提示
+      document.getElementById('companyName').addEventListener('change', async (e) => {
+        const company = e.target.value;
+        const typeCode = getChecklistTypeByCompany(company);
+        const infoText = document.getElementById('checklistInfoText');
+        if (!infoText) return;
+        
+        if (typeCode) {
+          const checklistTypeMap = await loadChecklistTypeMap();
+          const type = checklistTypeMap[typeCode];
+          if (type) {
+            infoText.innerHTML = `<p class="font-medium text-primary mb-1">已自动匹配检查清单</p><p>将使用【${type.name}】（${type.total_items}项）</p>`;
+          } else {
+            infoText.innerHTML = `<p class="font-medium text-primary mb-1">已匹配清单类型</p><p>类型：${typeCode === 'transmission' ? '输电组塔施工违章预判清单' : '变电工程违章预判清单'}</p>`;
+          }
+        } else if (company) {
+          infoText.innerHTML = `<p class="font-medium text-warning mb-1">未能匹配清单</p><p>请联系管理员配置该公司的检查清单。</p>`;
+        } else {
+          infoText.innerHTML = '<p class="font-medium text-primary mb-1">检查清单说明</p><p>请选择所属公司，系统将自动匹配对应的检查清单。</p>';
+        }
+      });
+      
+      // ★ 提交按钮（使用 button type=button，避免 form submit 事件冲突）
+      document.getElementById('submitNewTaskBtn').addEventListener('click', async () => {
+        const btn = document.getElementById('submitNewTaskBtn');
+        const formError = document.getElementById('formError');
+        
+        // 隐藏错误
+        formError.classList.add('hidden');
+        formError.textContent = '';
+        
+        const inspectorName = document.getElementById('inspectorName')?.value?.trim() || '';
+        const companyName = document.getElementById('companyName')?.value || '';
+        
+        // ★ 获取项目名称（支持下拉选择或手动输入）
+        const isManualInput = document.getElementById('manualProjectInput')?.checked || false;
+        let projectName = '';
+        let selectedPlanId = null;
+        
+        if (isManualInput) {
+          projectName = document.getElementById('projectNameManual')?.value?.trim() || '';
+        } else {
+          const projectSelect = document.getElementById('projectNameSelect');
+          if (projectSelect && projectSelect.value) {
+            selectedPlanId = projectSelect.value;
+            const selectedOption = projectSelect.selectedOptions[0];
+            if (selectedOption && selectedOption.dataset.project) {
+              try {
+                const projectData = JSON.parse(decodeURIComponent(selectedOption.dataset.project));
+                projectName = projectData.project_name || '';
+              } catch (e) {
+                projectName = selectedOption.textContent || '';
+              }
+            } else {
+              projectName = selectedOption?.textContent || '';
+            }
+          }
+        }
+        
+        const inspectionDate = document.getElementById('inspectionDate')?.value || '';
+        
+        // 表单验证
+        if (!inspectorName) {
+          formError.textContent = '请填写检查人员姓名';
+          formError.classList.remove('hidden');
+          document.getElementById('inspectorName')?.focus();
+          return;
+        }
+        if (!companyName) {
+          formError.textContent = '请选择所属公司';
+          formError.classList.remove('hidden');
+          return;
+        }
+        if (!projectName) {
+          formError.textContent = '请填写项目名称';
+          formError.classList.remove('hidden');
+          document.getElementById('projectName')?.focus();
+          return;
+        }
+        if (!inspectionDate) {
+          formError.textContent = '请选择检查日期';
+          formError.classList.remove('hidden');
+          return;
+        }
+        
+        // 禁用按钮防止重复提交
+        btn.disabled = true;
+        btn.innerHTML = `
+          <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+          </svg>
+          <span>创建中...</span>
+        `;
+        
+        setLoading(true);
+        
+        try {
+          // 根据公司匹配清单类型
+          const typeCode = getChecklistTypeByCompany(companyName);
+          const checklistTypeMap = await loadChecklistTypeMap();
+          const matchedType = typeCode ? checklistTypeMap[typeCode] : null;
+          
+          console.log('创建任务 - 公司:', companyName, '清单类型:', typeCode, '匹配结果:', matchedType);
+          
+          // 生成任务编号
+          const { data: taskNumber, error: numError } = await supabase.rpc('generate_task_number');
+          if (numError) {
+            console.error('生成任务编号失败:', numError);
+            throw new Error('生成任务编号失败: ' + numError.message);
+          }
+          
+          console.log('生成任务编号:', taskNumber);
+          
+          // 创建任务
+          const { data: task, error: taskError } = await supabase
+            .from('inspection_tasks')
+            .insert({
+              task_number: taskNumber,
+              inspector_name: inspectorName,
+              company_name: companyName,
+              project_name: projectName,
+              inspection_date: inspectionDate,
+              created_by: currentUser.id,
+              status: 'draft',
+              total_items: matchedType?.total_items || (typeCode === 'transmission' ? 60 : 33),
+              checklist_type_id: matchedType?.id || null
+            })
+            .select()
+            .single();
+          
+          if (taskError) {
+            console.error('创建任务失败:', taskError);
+            throw taskError;
+          }
+          
+          console.log('任务创建成功:', task.id);
+          
+          // 记录操作日志（不阻塞跳转）
+          supabase.from('operation_logs').insert({
+            task_id: task.id,
+            operator_name: inspectorName,
+            operation_type: 'create',
+            operation_detail: '创建检查任务'
+          }).then(({ error: logErr }) => {
+            if (logErr) console.warn('操作日志记录失败:', logErr);
+          });
+          
+          // ★ 如果是从日计划选择的项目，更新日计划状态（不阻塞跳转）
+          if (selectedPlanId) {
+            supabase.from('daily_plans')
+              .update({ status: 'in_progress', task_id: task.id })
+              .eq('id', selectedPlanId)
+              .then(({ error: planErr }) => {
+                if (planErr) console.warn('更新日计划状态失败:', planErr);
+              });
+          }
+          
+          showToast('检查任务创建成功，正在跳转...');
+          const typeParam = typeCode ? `&type=${typeCode}` : '';
+          
+          // 短暂延迟后跳转，让用户看到成功提示
+          setTimeout(() => {
+            window.location.href = `./inspection.html?id=${task.id}${typeParam}`;
+          }, 800);
+          
+        } catch (err) {
+          console.error('创建任务异常:', err);
+          
+          // 恢复按钮
+          btn.disabled = false;
+          btn.innerHTML = `
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            </svg>
+            <span>创建并开始检查</span>
+          `;
+          
+          // 显示详细错误信息
+          let errMsg = '创建失败，请重试';
+          if (err.code === '42501') {
+            errMsg = '权限不足：请确认您已登录，或联系管理员检查数据库权限配置';
+          } else if (err.code === '23503') {
+            errMsg = '数据关联错误（外键约束）：请联系管理员检查数据库配置';
+          } else if (err.code === '23505') {
+            errMsg = '任务编号重复，请稍后重试';
+          } else if (err.code === 'PGRST301') {
+            errMsg = '登录已过期，请重新登录';
+            setTimeout(() => window.location.href = './index.html', 2000);
+          } else if (err.message) {
+            errMsg = err.message;
+          }
+          formError.textContent = '错误：' + errMsg;
+          formError.classList.remove('hidden');
+          showToast(errMsg, 'error');
+        } finally {
+          setLoading(false);
+        }
+      });
+    }
+    
+    // ==================== 我的检查页面 ====================
+    async function renderMyTasks() {
+      mainContent.innerHTML = `
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold mb-2">我的检查</h2>
+          <p class="text-secondary">查看和管理您创建的检查任务</p>
+        </div>
+        
+        <div id="myTasksList" class="space-y-4">
+          <div class="text-center text-muted py-12">加载中...</div>
+        </div>
+      `;
+      
+      const { data: tasks } = await supabase
+        .from('inspection_tasks')
+        .select('*')
+        .eq('created_by', currentUser.id)
+        .order('created_at', { ascending: false });
+      
+      const container = document.getElementById('myTasksList');
+      
+      if (!tasks || tasks.length === 0) {
+        container.innerHTML = `
+          <div class="card">
+            <div class="card-body text-center py-12">
+              <svg class="w-16 h-16 mx-auto mb-4 text-muted opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+              </svg>
+              <p class="text-muted mb-4">您还没有创建任何检查任务</p>
+              <button onclick="loadPage('new-task')" class="btn btn-primary">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                <span>创建第一个检查</span>
+              </button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = tasks.map(task => `
+        <div class="card hover:border-primary transition-colors cursor-pointer" onclick="openTask('${task.id}')">
+          <div class="card-body">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl ${getStatusBgClass(task.status)} flex items-center justify-center flex-shrink-0">
+                  ${getStatusIcon(task.status)}
+                </div>
+                <div>
+                  <h3 class="font-semibold text-lg">${task.project_name}</h3>
+                  <p class="text-sm text-muted mt-1">
+                    <span class="font-mono">${task.task_number}</span>
+                    <span class="mx-2">·</span>
+                    <span>${task.company_name}</span>
+                  </p>
+                  <p class="text-sm text-secondary mt-1">
+                    检查人：${task.inspector_name} · 检查日期：${formatDate(task.inspection_date)}
+                  </p>
+                </div>
+              </div>
+              
+              <div class="flex items-center gap-4 sm:flex-col sm:items-end">
+                <span class="badge ${getStatusBadgeClass(task.status)}">${getStatusText(task.status)}</span>
+                <div class="flex items-center gap-2">
+                  <div class="w-24 h-2 bg-dark rounded-full overflow-hidden">
+                    <div class="h-full bg-gradient-to-r from-primary to-accent rounded-full" 
+                         style="width: ${(task.completed_items / task.total_items * 100).toFixed(0)}%"></div>
+                  </div>
+                  <span class="text-sm text-muted">${task.completed_items}/${task.total_items}</span>
+                </div>
+                ${task.problem_items > 0 ? `
+                  <span class="text-sm text-danger">发现 ${task.problem_items} 项问题</span>
+                ` : ''}
+              </div>
+            </div>
+            
+            ${task.status === 'rejected' && task.review_comment ? `
+              <div class="mt-4 p-3 bg-danger/10 border border-danger/30 rounded-lg">
+                <p class="text-sm text-danger">
+                  <strong>退回原因：</strong>${task.review_comment}
+                </p>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // ==================== 记录查询页面 ====================
+    async function renderQuery() {
+      const { data: companies } = await supabase
+        .from('companies')
+        .select('*')
+        .order('sort_order');
+      
+      const companyOptions = companies?.map(c => 
+        `<option value="${c.name}">${c.name}</option>`
+      ).join('') || '';
+      
+      mainContent.innerHTML = `
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold mb-2">记录查询</h2>
+          <p class="text-secondary">${isManager ? '查询所有检查记录' : '查询本公司的检查记录'}</p>
+        </div>
+        
+        <!-- 筛选条件 -->
+        <div class="card mb-6">
+          <div class="card-body">
+            <form id="queryForm" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="form-group mb-0">
+                <label class="form-label">公司名称</label>
+                <select id="filterCompany" class="form-input form-select">
+                  <option value="">全部公司</option>
+                  ${companyOptions}
+                </select>
+              </div>
+              
+              <div class="form-group mb-0">
+                <label class="form-label">项目名称</label>
+                <input type="text" id="filterProject" class="form-input" placeholder="输入项目名称关键词">
+              </div>
+              
+              <div class="form-group mb-0">
+                <label class="form-label">检查日期（起）</label>
+                <input type="date" id="filterDateFrom" class="form-input">
+              </div>
+              
+              <div class="form-group mb-0">
+                <label class="form-label">检查日期（止）</label>
+                <input type="date" id="filterDateTo" class="form-input">
+              </div>
+              
+              <div class="form-group mb-0">
+                <label class="form-label">检查人员</label>
+                <input type="text" id="filterInspector" class="form-input" placeholder="输入检查人员姓名">
+              </div>
+              
+              <div class="form-group mb-0">
+                <label class="form-label">状态</label>
+                <select id="filterStatus" class="form-input form-select">
+                  <option value="">全部状态</option>
+                  <option value="draft">草稿</option>
+                  <option value="submitted">待审核</option>
+                  <option value="approved">已通过</option>
+                  <option value="rejected">已退回</option>
+                  <option value="archived">已归档</option>
+                </select>
+              </div>
+              
+              <div class="flex items-end gap-2 lg:col-span-2">
+                <button type="submit" class="btn btn-primary flex-1">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                  <span>查询</span>
+                </button>
+                <button type="reset" class="btn btn-secondary">重置</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <!-- 查询结果 -->
+        <div id="queryResults" class="space-y-4">
+          <div class="text-center text-muted py-8">请设置筛选条件后点击查询</div>
+        </div>
+      `;
+      
+      document.getElementById('queryForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await executeQuery();
+      });
+      
+      document.getElementById('queryForm').addEventListener('reset', () => {
+        setTimeout(() => {
+          document.getElementById('queryResults').innerHTML = `
+            <div class="text-center text-muted py-8">请设置筛选条件后点击查询</div>
+          `;
+        }, 0);
+      });
+    }
+    
+    async function executeQuery() {
+      const company = document.getElementById('filterCompany').value;
+      const project = document.getElementById('filterProject').value.trim();
+      const dateFrom = document.getElementById('filterDateFrom').value;
+      const dateTo = document.getElementById('filterDateTo').value;
+      const inspector = document.getElementById('filterInspector').value.trim();
+      const status = document.getElementById('filterStatus').value;
+      
+      const container = document.getElementById('queryResults');
+      container.innerHTML = '<div class="text-center text-muted py-8">查询中...</div>';
+      
+      let query = supabase
+        .from('inspection_tasks')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      // 非管理人员只能查看自己公司的记录
+      if (!isManager && currentUser.profile?.company_name) {
+        query = query.eq('company_name', currentUser.profile.company_name);
+      }
+      
+      if (company) query = query.eq('company_name', company);
+      if (project) query = query.ilike('project_name', `%${project}%`);
+      if (dateFrom) query = query.gte('inspection_date', dateFrom);
+      if (dateTo) query = query.lte('inspection_date', dateTo);
+      if (inspector) query = query.ilike('inspector_name', `%${inspector}%`);
+      if (status) query = query.eq('status', status);
+      
+      const { data: tasks, error } = await query;
+      
+      if (error) {
+        container.innerHTML = `<div class="text-center text-danger py-8">查询失败：${error.message}</div>`;
+        return;
+      }
+      
+      if (!tasks || tasks.length === 0) {
+        container.innerHTML = `
+          <div class="card">
+            <div class="card-body text-center py-12">
+              <svg class="w-16 h-16 mx-auto mb-4 text-muted opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              <p class="text-muted">未找到符合条件的记录</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = `
+        <p class="text-sm text-muted mb-4">共找到 ${tasks.length} 条记录</p>
+        ${tasks.map(task => `
+          <div class="card hover:border-primary transition-colors cursor-pointer" onclick="viewTaskDetail('${task.id}')">
+            <div class="card-body">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-xl ${getStatusBgClass(task.status)} flex items-center justify-center flex-shrink-0">
+                    ${getStatusIcon(task.status)}
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-lg">${task.project_name}</h3>
+                    <p class="text-sm text-muted mt-1">
+                      <span class="font-mono">${task.task_number}</span>
+                      <span class="mx-2">·</span>
+                      <span>${task.company_name}</span>
+                    </p>
+                    <p class="text-sm text-secondary mt-1">
+                      检查人：${task.inspector_name} · 检查日期：${formatDate(task.inspection_date)}
+                    </p>
+                  </div>
+                </div>
+                
+                <div class="flex items-center gap-4 sm:flex-col sm:items-end">
+                  <span class="badge ${getStatusBadgeClass(task.status)}">${getStatusText(task.status)}</span>
+                  <div class="flex items-center gap-2">
+                    <div class="w-24 h-2 bg-dark rounded-full overflow-hidden">
+                      <div class="h-full bg-gradient-to-r from-primary to-accent rounded-full" 
+                           style="width: ${(task.completed_items / task.total_items * 100).toFixed(0)}%"></div>
+                    </div>
+                    <span class="text-sm text-muted">${task.completed_items}/${task.total_items}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      `;
+    }
+    
+    // ==================== 待审核页面（仅管理人员） ====================
+    async function renderReview() {
+      if (!isManager) {
+        mainContent.innerHTML = `
+          <div class="card">
+            <div class="card-body text-center py-16">
+              <div class="w-20 h-20 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold text-danger mb-2">权限不足</h3>
+              <p class="text-secondary mb-2">审核功能仅限管理人员使用</p>
+              <p class="text-sm text-muted mb-6">现场负责人账号无法进行审核操作</p>
+              <button onclick="loadPage('dashboard')" class="btn btn-secondary">返回工作台</button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      mainContent.innerHTML = `
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold mb-2">待审核</h2>
+          <p class="text-secondary">审核检查员提交的检查记录</p>
+        </div>
+        
+        <div id="reviewList" class="space-y-4">
+          <div class="text-center text-muted py-12">加载中...</div>
+        </div>
+      `;
+      
+      const { data: tasks } = await supabase
+        .from('inspection_tasks')
+        .select('*')
+        .eq('status', 'submitted')
+        .order('created_at', { ascending: true });
+      
+      const container = document.getElementById('reviewList');
+      
+      if (!tasks || tasks.length === 0) {
+        container.innerHTML = `
+          <div class="card">
+            <div class="card-body text-center py-12">
+              <svg class="w-16 h-16 mx-auto mb-4 text-success opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <p class="text-muted">暂无待审核的检查记录</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = tasks.map(task => `
+        <div class="card">
+          <div class="card-body">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div class="flex items-start gap-4">
+                <div class="w-12 h-12 rounded-xl bg-info/20 flex items-center justify-center flex-shrink-0">
+                  <svg class="w-6 h-6 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="font-semibold text-lg">${task.project_name}</h3>
+                  <p class="text-sm text-muted mt-1">
+                    <span class="font-mono">${task.task_number}</span>
+                    <span class="mx-2">·</span>
+                    <span>${task.company_name}</span>
+                  </p>
+                  <p class="text-sm text-secondary mt-1">
+                    检查人：${task.inspector_name} · 检查日期：${formatDate(task.inspection_date)}
+                  </p>
+                  <div class="flex items-center gap-4 mt-2">
+                    <span class="text-sm">完成度：${task.completed_items}/${task.total_items}</span>
+                    ${task.problem_items > 0 ? `
+                      <span class="text-sm text-danger">发现 ${task.problem_items} 项问题</span>
+                    ` : `
+                      <span class="text-sm text-success">无问题</span>
+                    `}
+                  </div>
+                </div>
+              </div>
+              
+              <div class="flex gap-2">
+                <button onclick="viewTaskDetail('${task.id}')" class="btn btn-secondary btn-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                  </svg>
+                  <span>查看详情</span>
+                </button>
+                <button onclick="approveTask('${task.id}')" class="btn btn-success btn-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>通过</span>
+                </button>
+                <button onclick="rejectTask('${task.id}')" class="btn btn-danger btn-sm">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                  <span>退回</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // ==================== 全部记录页面（仅管理人员） ====================
+    async function renderAllTasks() {
+      if (!isManager) {
+        mainContent.innerHTML = `
+          <div class="card">
+            <div class="card-body text-center py-16">
+              <div class="w-20 h-20 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-4">
+                <svg class="w-10 h-10 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                </svg>
+              </div>
+              <h3 class="text-xl font-bold text-danger mb-2">权限不足</h3>
+              <p class="text-secondary mb-6">此功能仅限管理人员使用</p>
+              <button onclick="loadPage('dashboard')" class="btn btn-secondary">返回工作台</button>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      mainContent.innerHTML = `
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold mb-2">全部记录</h2>
+          <p class="text-secondary">查看所有检查记录</p>
+        </div>
+        
+        <div id="allTasksList" class="space-y-4">
+          <div class="text-center text-muted py-12">加载中...</div>
+        </div>
+      `;
+      
+      const { data: tasks } = await supabase
+        .from('inspection_tasks')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      const container = document.getElementById('allTasksList');
+      
+      if (!tasks || tasks.length === 0) {
+        container.innerHTML = `
+          <div class="card">
+            <div class="card-body text-center py-12">
+              <p class="text-muted">暂无检查记录</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = `
+        <p class="text-sm text-muted mb-4">共 ${tasks.length} 条记录</p>
+        ${tasks.map(task => `
+          <div class="card hover:border-primary transition-colors cursor-pointer" onclick="viewTaskDetail('${task.id}')">
+            <div class="card-body">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-xl ${getStatusBgClass(task.status)} flex items-center justify-center flex-shrink-0">
+                    ${getStatusIcon(task.status)}
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-lg">${task.project_name}</h3>
+                    <p class="text-sm text-muted mt-1">
+                      <span class="font-mono">${task.task_number}</span>
+                      <span class="mx-2">·</span>
+                      <span>${task.company_name}</span>
+                    </p>
+                    <p class="text-sm text-secondary mt-1">
+                      检查人：${task.inspector_name} · 检查日期：${formatDate(task.inspection_date)}
+                    </p>
+                  </div>
+                </div>
+                
+                <div class="flex items-center gap-4 sm:flex-col sm:items-end">
+                  <span class="badge ${getStatusBadgeClass(task.status)}">${getStatusText(task.status)}</span>
+                  <div class="flex items-center gap-2">
+                    <div class="w-24 h-2 bg-dark rounded-full overflow-hidden">
+                      <div class="h-full bg-gradient-to-r from-primary to-accent rounded-full" 
+                           style="width: ${(task.completed_items / task.total_items * 100).toFixed(0)}%"></div>
+                    </div>
+                    <span class="text-sm text-muted">${task.completed_items}/${task.total_items}</span>
+                  </div>
+                  ${task.problem_items > 0 ? `
+                    <span class="text-sm text-danger">发现 ${task.problem_items} 项问题</span>
+                  ` : ''}
+                </div>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      `;
+    }
+    
+    // 审核通过
+    window.approveTask = async function(taskId) {
+      // 权限检查
+      if (!isManager) {
+        showToast('您没有审核权限', 'error');
+        return;
+      }
+      
+      if (!confirm('确定要通过此检查记录吗？')) return;
+      
+      setLoading(true);
+      
+      try {
+        const { error } = await supabase
+          .from('inspection_tasks')
+          .update({
+            status: 'archived',
+            reviewer_id: currentUser.id,
+            reviewed_at: new Date().toISOString()
+          })
+          .eq('id', taskId);
+        
+        if (error) throw error;
+        
+        await supabase.from('operation_logs').insert({
+          task_id: taskId,
+          operator_name: currentUser.profile?.display_name || currentUser.email,
+          operation_type: 'approve',
+          operation_detail: '审核通过并归档'
+        });
+        
+        showToast('审核通过，记录已归档');
+        loadPendingCount();
+        renderReview();
+        
+      } catch (error) {
+        console.error('Approve error:', error);
+        showToast(error.message || '操作失败', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    // 退回
+    window.rejectTask = async function(taskId) {
+      // 权限检查
+      if (!isManager) {
+        showToast('您没有审核权限', 'error');
+        return;
+      }
+      
+      const comment = prompt('请输入退回原因：');
+      if (comment === null) return;
+      if (!comment.trim()) {
+        showToast('请输入退回原因', 'error');
+        return;
+      }
+      
+      setLoading(true);
+      
+      try {
+        const { error } = await supabase
+          .from('inspection_tasks')
+          .update({
+            status: 'rejected',
+            reviewer_id: currentUser.id,
+            review_comment: comment.trim(),
+            reviewed_at: new Date().toISOString()
+          })
+          .eq('id', taskId);
+        
+        if (error) throw error;
+        
+        await supabase.from('operation_logs').insert({
+          task_id: taskId,
+          operator_name: currentUser.profile?.display_name || currentUser.email,
+          operation_type: 'reject',
+          operation_detail: `退回：${comment.trim()}`
+        });
+        
+        showToast('已退回');
+        loadPendingCount();
+        renderReview();
+        
+      } catch (error) {
+        console.error('Reject error:', error);
+        showToast(error.message || '操作失败', 'error');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    // 打开任务（跳转到执行页面）
+    window.openTask = function(taskId) {
+      window.location.href = `./inspection.html?id=${taskId}`;
+    };
+    
+    window.viewTaskDetail = function(taskId) {
+      if (event) event.stopPropagation();
+      window.location.href = `./detail.html?id=${taskId}`;
+    };
+    
+    // 状态相关辅助函数
+    function getStatusText(status) {
+      const map = {
+        'draft': '草稿',
+        'submitted': '待审核',
+        'reviewing': '审核中',
+        'approved': '已通过',
+        'rejected': '已退回',
+        'archived': '已归档'
+      };
+      return map[status] || status;
+    }
+    
+    function getStatusBadgeClass(status) {
+      const map = {
+        'draft': 'badge-warning',
+        'submitted': 'badge-info',
+        'reviewing': 'badge-info',
+        'approved': 'badge-success',
+        'rejected': 'badge-danger',
+        'archived': 'badge-success'
+      };
+      return map[status] || 'badge-muted';
+    }
+    
+    function getStatusBgClass(status) {
+      const map = {
+        'draft': 'bg-warning/20',
+        'submitted': 'bg-info/20',
+        'reviewing': 'bg-info/20',
+        'approved': 'bg-success/20',
+        'rejected': 'bg-danger/20',
+        'archived': 'bg-success/20'
+      };
+      return map[status] || 'bg-muted/20';
+    }
+    
+    function getStatusIcon(status) {
+      const icons = {
+        'draft': '<svg class="w-5 h-5 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>',
+        'submitted': '<svg class="w-5 h-5 text-info" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+        'approved': '<svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>',
+        'rejected': '<svg class="w-5 h-5 text-danger" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>',
+        'archived': '<svg class="w-5 h-5 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>'
+      };
+      return icons[status] || icons['draft'];
+    }
+    
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const date = new Date(dateStr);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    }
+  </script>
+</body>
+</html>

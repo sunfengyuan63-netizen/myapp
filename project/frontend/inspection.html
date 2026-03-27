@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-node-id="b7533622-29b2-11f1-be13-122a9cb60781">
+<head data-node-id="b7534e14-29b2-11f1-be13-122a9cb60781">
+  <meta charset="UTF-8" data-node-id="b7534d4c-29b2-11f1-be13-122a9cb60781">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" data-node-id="b7532312-29b2-11f1-be13-122a9cb60781">
+  <title data-node-id="b7532448-29b2-11f1-be13-122a9cb60781">执行检查 - 违章预判检查系统</title>
+  <link rel="manifest" href="./manifest.json" data-node-id="b7533e6a-29b2-11f1-be13-122a9cb60781">
+  <meta name="theme-color" content="#FF6B00" data-node-id="b7533f32-29b2-11f1-be13-122a9cb60781">
+  <link rel="stylesheet" href="./css/styles.css" data-node-id="b7532510-29b2-11f1-be13-122a9cb60781">
+  <script src="./js/tailwind.js" data-node-id="b7532ba0-29b2-11f1-be13-122a9cb60781"></script>
+  <style data-node-id="b7533ffa-29b2-11f1-be13-122a9cb60781">
+    .item-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+    .item-card.status-pass { border-left: 4px solid var(--success); }
+    .item-card.status-not_applicable { border-left: 4px solid var(--text-muted); opacity: 0.7; }
+    .item-card.status-problem { border-left: 4px solid var(--danger); background: rgba(230,57,70,0.04); }
+    .item-card.status-rectified { border-left: 4px solid var(--info); }
+
+    .result-btn {
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .result-btn.pass { background: rgba(46,204,113,0.15); color: var(--success); border-color: rgba(46,204,113,0.3); }
+    .result-btn.pass.active { background: var(--success); color: white; }
+    .result-btn.na { background: rgba(127,140,141,0.15); color: var(--text-muted); border-color: rgba(127,140,141,0.3); }
+    .result-btn.na.active { background: var(--text-muted); color: white; }
+    .result-btn.problem { background: rgba(230,57,70,0.15); color: var(--danger); border-color: rgba(230,57,70,0.3); }
+    .result-btn.problem.active { background: var(--danger); color: white; }
+
+    .category-header {
+      background: linear-gradient(135deg, rgba(255,107,0,0.12) 0%, rgba(255,217,61,0.08) 100%);
+      border: 1px solid rgba(255,107,0,0.2);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      margin: 1.5rem 0 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .category-header.substation-cat {
+      background: linear-gradient(135deg, rgba(52,152,219,0.12) 0%, rgba(155,89,182,0.08) 100%);
+      border-color: rgba(52,152,219,0.2);
+    }
+
+    .progress-sticky {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-dark);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+    }
+
+    .rectify-panel {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: var(--bg-elevated);
+      border-radius: 8px;
+      border: 1px solid rgba(230,57,70,0.2);
+    }
+
+    /* 照片上传区域 - 每项都显示 */
+    .photo-upload-area {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: var(--bg-elevated);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--bg-elevated);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      transition: all 0.2s ease;
+    }
+    .upload-btn:hover { border-color: var(--primary); color: var(--primary); }
+
+    .evidence-thumb {
+      width: 64px; height: 64px;
+      border-radius: 6px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .evidence-thumb img, .evidence-thumb video {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .evidence-thumb .del-btn {
+      position: absolute; top: 2px; right: 2px;
+      width: 18px; height: 18px;
+      background: rgba(230,57,70,0.85);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 10px; cursor: pointer;
+      z-index: 1;
+    }
+
+    .filter-tabs {
+      display: flex; gap: 0.5rem; flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+    .filter-tab {
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-tab.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .lightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.95);
+      z-index: 2000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 2rem;
+    }
+    .lightbox img, .lightbox video { max-width: 100%; max-height: 100%; object-fit: contain; }
+    .lightbox-close {
+      position: absolute; top: 1rem; right: 1rem;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: var(--bg-card); border: 1px solid var(--border);
+      color: white; font-size: 1.25rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    /* 按钮禁用状态 */
+    .result-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* 保存中状态指示 */
+    .saving-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* 上传中动画 */
+    .uploading-spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid rgba(255,107,0,0.3);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+  <script src="https://creo4u.com/bubble-popup.min.js" data-node-id="b7532c5e-29b2-11f1-be13-122a9cb60781"></script>
+</head>
+<body class="industrial-bg" data-node-id="b75358e6-29b2-11f1-be13-122a9cb60781">
+  <div class="warning-stripe" data-node-id="b75330a0-29b2-11f1-be13-122a9cb60781"></div>
+
+  <!-- 顶部导航 -->
+  <nav class="navbar flex items-center justify-between" data-node-id="b75325d8-29b2-11f1-be13-122a9cb60781">
+    <div class="flex items-center gap-3" data-node-id="b75340c2-29b2-11f1-be13-122a9cb60781">
+      <button onclick="goBack()" class="p-2 text-secondary hover:text-primary" data-node-id="b7532d26-29b2-11f1-be13-122a9cb60781">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b75326aa-29b2-11f1-be13-122a9cb60781">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" data-node-id="b7534efa-29b2-11f1-be13-122a9cb60781"></path>
+        </svg>
+      </button>
+      <div data-node-id="b75359b8-29b2-11f1-be13-122a9cb60781">
+        <h1 class="font-bold text-lg leading-tight" data-node-id="b75336f4-29b2-11f1-be13-122a9cb60781">执行检查</h1>
+        <p id="taskNumberNav" class="text-xs text-muted font-mono" data-node-id="b7532768-29b2-11f1-be13-122a9cb60781"></p>
+      </div>
+    </div>
+    <div class="flex items-center gap-2" data-node-id="b7534ffe-29b2-11f1-be13-122a9cb60781">
+      <span id="autoSaveStatus" class="text-xs text-muted hidden" data-node-id="b753418a-29b2-11f1-be13-122a9cb60781">已自动保存</span>
+      <button id="submitBtn" class="btn btn-success btn-sm hidden" data-node-id="b75337e4-29b2-11f1-be13-122a9cb60781">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" data-node-id="b753510c-29b2-11f1-be13-122a9cb60781">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" data-node-id="b7532830-29b2-11f1-be13-122a9cb60781"></path>
+        </svg>
+        <span class="hidden sm:inline" data-node-id="b7532de4-29b2-11f1-be13-122a9cb60781">提交审核</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- 进度条（sticky） -->
+  <div class="progress-sticky" data-node-id="b7532eac-29b2-11f1-be13-122a9cb60781">
+    <div class="flex items-center justify-between mb-1" data-node-id="b7534252-29b2-11f1-be13-122a9cb60781">
+      <span class="text-sm text-secondary" id="progressText" data-node-id="b75338de-29b2-11f1-be13-122a9cb60781">加载中...</span>
+      <span class="text-sm font-mono text-primary" id="progressCount" data-node-id="b75351d4-29b2-11f1-be13-122a9cb60781">0/0</span>
+    </div>
+    <div class="w-full h-2 bg-dark rounded-full overflow-hidden" data-node-id="b7534626-29b2-11f1-be13-122a9cb60781">
+      <div id="progressBar" class="h-full bg-gradient-to-r from-primary to-accent rounded-full transition-all duration-300" style="width:0%" data-node-id="b75353b4-29b2-11f1-be13-122a9cb60781"></div>
+    </div>
+  </div>
+
+  <main class="p-4 md:p-6 max-w-4xl mx-auto" data-node-id="b7534310-29b2-11f1-be13-122a9cb60781">
+    <!-- 任务基本信息 -->
+    <div class="card mb-4" data-node-id="b753315e-29b2-11f1-be13-122a9cb60781">
+      <div class="card-body py-3" data-node-id="b75339ba-29b2-11f1-be13-122a9cb60781">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm" data-node-id="b75328ee-29b2-11f1-be13-122a9cb60781">
+          <div data-node-id="b7533226-29b2-11f1-be13-122a9cb60781"><span class="text-muted" data-node-id="b75332ee-29b2-11f1-be13-122a9cb60781">检查人：</span><span id="infoInspector" class="font-medium" data-node-id="b75343d8-29b2-11f1-be13-122a9cb60781">-</span></div>
+          <div data-node-id="b7533a82-29b2-11f1-be13-122a9cb60781"><span class="text-muted" data-node-id="b7535a80-29b2-11f1-be13-122a9cb60781">所属公司：</span><span id="infoCompany" class="font-medium" data-node-id="b75346ee-29b2-11f1-be13-122a9cb60781">-</span></div>
+          <div data-node-id="b7533b4a-29b2-11f1-be13-122a9cb60781"><span class="text-muted" data-node-id="b75347c0-29b2-11f1-be13-122a9cb60781">项目名称：</span><span id="infoProject" class="font-medium" data-node-id="b7535b48-29b2-11f1-be13-122a9cb60781">-</span></div>
+          <div data-node-id="b753547c-29b2-11f1-be13-122a9cb60781"><span class="text-muted" data-node-id="b7535544-29b2-11f1-be13-122a9cb60781">检查日期：</span><span id="infoDate" class="font-medium" data-node-id="b75333b6-29b2-11f1-be13-122a9cb60781">-</span></div>
+        </div>
+        <div class="mt-2 flex items-center gap-2" data-node-id="b7535c1a-29b2-11f1-be13-122a9cb60781">
+          <span id="checklistTypeBadge" class="badge badge-primary text-xs" data-node-id="b753581e-29b2-11f1-be13-122a9cb60781"></span>
+          <span id="taskStatusBadge" class="badge badge-warning text-xs" data-node-id="b753487e-29b2-11f1-be13-122a9cb60781">草稿</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 筛选标签 -->
+    <div class="filter-tabs" id="filterTabsContainer" data-node-id="b7532a06-29b2-11f1-be13-122a9cb60781">
+      <button class="filter-tab active" data-filter="all" data-node-id="b75344a0-29b2-11f1-be13-122a9cb60781">全部</button>
+      <button class="filter-tab" data-filter="unchecked" data-node-id="b7534946-29b2-11f1-be13-122a9cb60781">未检查</button>
+      <button class="filter-tab" data-filter="pass" data-node-id="b7534a22-29b2-11f1-be13-122a9cb60781">无问题</button>
+      <button class="filter-tab" data-filter="problem" data-node-id="b7533488-29b2-11f1-be13-122a9cb60781">有问题</button>
+      <button class="filter-tab" data-filter="not_applicable" data-node-id="b7532fd8-29b2-11f1-be13-122a9cb60781">不涉及</button>
+    </div>
+
+    <!-- 检查项列表 -->
+    <div id="itemsList" data-node-id="b7534c84-29b2-11f1-be13-122a9cb60781">
+      <div class="text-center text-muted py-16" data-node-id="b7533dac-29b2-11f1-be13-122a9cb60781">加载中...</div>
+    </div>
+  </main>
+
+  <!-- Toast 容器 -->
+  <div id="toastContainer" class="toast-container" data-node-id="b7535cec-29b2-11f1-be13-122a9cb60781"></div>
+
+  <!-- 加载遮罩 -->
+  <div id="loadingOverlay" class="loading-overlay hidden" data-node-id="b753455e-29b2-11f1-be13-122a9cb60781">
+    <div class="spinner" data-node-id="b753355a-29b2-11f1-be13-122a9cb60781"></div>
+    <p class="text-secondary" data-node-id="b7533c1c-29b2-11f1-be13-122a9cb60781">处理中...</p>
+  </div>
+
+  <!-- 图片/视频预览 -->
+  <div id="lightbox" class="lightbox hidden" onclick="closeLightbox()" data-node-id="b7534af4-29b2-11f1-be13-122a9cb60781">
+    <button class="lightbox-close" onclick="closeLightbox()" data-node-id="b7532ad8-29b2-11f1-be13-122a9cb60781">×</button>
+    <div id="lightboxContent" data-node-id="b7534bbc-29b2-11f1-be13-122a9cb60781"></div>
+  </div>
+
+  <script type="module" data-node-id="b7533ce4-29b2-11f1-be13-122a9cb60781">
+    import { supabase, SUPABASE_URL } from './js/supabase.js';
+    import { checkAuth, getCurrentUser } from './js/auth.js';
+
+    // 全局状态
+    let currentUser = null;
+    let taskId = null;
+    let task = null;
+    let checklistTypeCode = 'transmission';
+    let categories = [];
+    let items = [];
+    let results = {}; // item_id -> result
+    let currentFilter = 'all';
+    let savingItems = new Set(); // 防止重复保存
+    let uploadingItems = new Set(); // 防止重复上传
+
+    const SUPABASE_STORAGE_URL = SUPABASE_URL + '/storage/v1/object/public/evidence-files/';
+
+    // DOM
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const toastContainer = document.getElementById('toastContainer');
+
+    async function init() {
+      const session = await checkAuth();
+      if (!session) { window.location.href = './index.html'; return; }
+
+      currentUser = await getCurrentUser();
+      if (!currentUser) { window.location.href = './index.html'; return; }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      taskId = urlParams.get('id');
+      const urlType = urlParams.get('type');
+      if (urlType) checklistTypeCode = urlType;
+
+      if (!taskId) {
+        showToast('无效的任务ID', 'error');
+        setTimeout(() => window.location.href = './home.html', 1500);
+        return;
+      }
+
+      setLoading(true);
+      try {
+        await loadTask();
+        await loadChecklistItems();
+        await loadResults();
+        renderAll();
+        setupSubmitBtn();
+        setupFilterTabs();
+      } catch (err) {
+        console.error('Init error:', err);
+        showToast('加载失败：' + (err.message || '未知错误'), 'error');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    init();
+
+    // 加载任务信息
+    async function loadTask() {
+      const { data, error } = await supabase
+        .from('inspection_tasks')
+        .select('*, checklist_types(name, code, total_items)')
+        .eq('id', taskId)
+        .single();
+
+      if (error) {
+        console.error('loadTask error:', error);
+        throw new Error('任务不存在或无权访问（错误码：' + error.code + '）');
+      }
+      if (!data) throw new Error('任务不存在');
+      task = data;
+
+      // 优先从任务关联的 checklist_types 确定类型
+      if (task.checklist_types && task.checklist_types.code) {
+        checklistTypeCode = task.checklist_types.code;
+      } else if (task.company_name) {
+        checklistTypeCode = task.company_name.includes('输电') ? 'transmission' : 'substation';
+      }
+
+      document.getElementById('taskNumberNav').textContent = task.task_number;
+      document.getElementById('infoInspector').textContent = task.inspector_name;
+      document.getElementById('infoCompany').textContent = task.company_name;
+      document.getElementById('infoProject').textContent = task.project_name;
+      document.getElementById('infoDate').textContent = formatDate(task.inspection_date);
+
+      const typeName = task.checklist_types?.name || (checklistTypeCode === 'transmission' ? '输电组塔施工违章预判清单(60项)' : '变电工程违章预判清单(33项)');
+      document.getElementById('checklistTypeBadge').textContent = typeName;
+
+      const statusMap = { draft: '草稿', submitted: '待审核', approved: '已通过', rejected: '已退回', archived: '已归档' };
+      const statusBadgeClass = { draft: 'badge-warning', submitted: 'badge-info', approved: 'badge-success', rejected: 'badge-danger', archived: 'badge-success' };
+      const statusBadge = document.getElementById('taskStatusBadge');
+      statusBadge.textContent = statusMap[task.status] || task.status;
+      statusBadge.className = `badge ${statusBadgeClass[task.status] || 'badge-muted'} text-xs`;
+    }
+
+    // 加载检查项（根据清单类型）
+    async function loadChecklistItems() {
+      try {
+        if (checklistTypeCode === 'substation') {
+          const [catsRes, itsRes] = await Promise.all([
+            supabase.from('substation_categories').select('*').order('sort_order'),
+            supabase.from('substation_items').select('*').order('sequence_number')
+          ]);
+          if (catsRes.error) console.warn('substation_categories error:', catsRes.error);
+          if (itsRes.error) console.warn('substation_items error:', itsRes.error);
+          categories = catsRes.data || [];
+          items = itsRes.data || [];
+        } else {
+          const [catsRes, itsRes] = await Promise.all([
+            supabase.from('inspection_categories').select('*').order('sort_order'),
+            supabase.from('inspection_items').select('*').order('sequence_number')
+          ]);
+          if (catsRes.error) console.warn('inspection_categories error:', catsRes.error);
+          if (itsRes.error) console.warn('inspection_items error:', itsRes.error);
+          categories = catsRes.data || [];
+          items = itsRes.data || [];
+        }
+
+        if (items.length === 0) {
+          console.warn('清单项为空，类型：', checklistTypeCode);
+          showToast('警告：未找到检查清单项目，请联系管理员', 'warning');
+        }
+      } catch (err) {
+        console.error('loadChecklistItems error:', err);
+        categories = [];
+        items = [];
+      }
+    }
+
+    // 加载已有检查结果（不 join evidence_files，避免 RLS 问题）
+    async function loadResults() {
+      const { data: resultsData, error: resultsError } = await supabase
+        .from('inspection_results')
+        .select('id, task_id, item_id, status, rectification_measure, rectification_date, created_at, updated_at')
+        .eq('task_id', taskId);
+
+      if (resultsError) {
+        console.error('loadResults error:', resultsError);
+        results = {};
+        return;
+      }
+
+      results = {};
+      (resultsData || []).forEach(r => {
+        results[r.item_id] = { ...r, evidence_files: [] };
+      });
+
+      // 分批加载 evidence_files（避免 RLS 联表问题）
+      const resultIds = Object.values(results).map(r => r.id);
+      if (resultIds.length > 0) {
+        const { data: evData, error: evError } = await supabase
+          .from('evidence_files')
+          .select('id, result_id, file_name, file_type, file_size, storage_path, created_at')
+          .in('result_id', resultIds);
+
+        if (!evError && evData) {
+          evData.forEach(ev => {
+            // 找到对应的 result
+            const result = Object.values(results).find(r => r.id === ev.result_id);
+            if (result) {
+              result.evidence_files.push(ev);
+            }
+          });
+        } else if (evError) {
+          console.warn('loadEvidenceFiles error:', evError);
+        }
+      }
+
+      console.log('已加载检查结果：', Object.keys(results).length, '条');
+    }
+
+    // 渲染所有内容
+    function renderAll() {
+      updateProgress();
+      renderItems();
+    }
+
+    // 更新进度
+    function updateProgress() {
+      const total = items.length;
+      const checked = Object.keys(results).length;
+      const pct = total > 0 ? Math.round(checked / total * 100) : 0;
+      document.getElementById('progressText').textContent = `已检查 ${checked} 项，共 ${total} 项`;
+      document.getElementById('progressCount').textContent = `${pct}%`;
+      document.getElementById('progressBar').style.width = pct + '%';
+    }
+
+    // 渲染检查项列表
+    function renderItems() {
+      const container = document.getElementById('itemsList');
+      const isSubstation = checklistTypeCode === 'substation';
+      const isDraft = task.status === 'draft';
+
+      let filteredItems = items;
+      if (currentFilter === 'unchecked') {
+        filteredItems = items.filter(item => !results[item.id]);
+      } else if (currentFilter !== 'all') {
+        filteredItems = items.filter(item => results[item.id]?.status === currentFilter);
+      }
+
+      if (filteredItems.length === 0) {
+        container.innerHTML = `<div class="text-center text-muted py-12">
+          <svg class="w-12 h-12 mx-auto mb-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+          </svg>
+          <p>暂无符合条件的检查项</p>
+        </div>`;
+        return;
+      }
+
+      let html = '';
+      let lastCatId = null;
+
+      filteredItems.forEach(item => {
+        const cat = categories.find(c => c.id === item.category_id);
+        const result = results[item.id];
+        const status = result?.status || '';
+        const evidenceFiles = result?.evidence_files || [];
+
+        if (item.category_id !== lastCatId) {
+          lastCatId = item.category_id;
+          html += `
+            <div class="category-header ${isSubstation ? 'substation-cat' : ''}">
+              <span class="text-lg">${isSubstation ? '🔌' : '⚡'}</span>
+              <span class="font-semibold">${cat?.name || '其他'}</span>
+              <span class="ml-auto text-xs text-muted">${isSubstation ? '变电工程' : '输电组塔'}</span>
+            </div>
+          `;
+        }
+
+        const statusClass = status ? `status-${status}` : '';
+
+        html += `
+          <div class="item-card ${statusClass} mb-3" id="item-card-${item.id}">
+            <div class="flex items-start gap-3">
+              <span class="font-mono text-primary font-bold text-sm flex-shrink-0 mt-0.5">${item.sequence_number}</span>
+              <div class="flex-1 min-w-0">
+                <h4 class="font-medium text-sm mb-1">${item.violation_content}</h4>
+                <p class="text-xs text-secondary mb-3">${item.inspection_points}</p>
+
+                <!-- 操作按钮 -->
+                ${isDraft ? `
+                  <div class="flex flex-wrap gap-2 mb-2">
+                    <button class="result-btn pass ${status === 'pass' ? 'active' : ''}"
+                            data-item-id="${item.id}" data-action="pass">✓ 无问题</button>
+                    <button class="result-btn na ${status === 'not_applicable' ? 'active' : ''}"
+                            data-item-id="${item.id}" data-action="not_applicable">○ 不涉及</button>
+                    <button class="result-btn problem ${status === 'problem' ? 'active' : ''}"
+                            data-item-id="${item.id}" data-action="problem">✗ 有问题</button>
+                  </div>
+                ` : `
+                  <div class="mb-2">
+                    ${status === 'pass' ? '<span class="badge badge-success text-xs">✓ 无问题</span>' :
+                      status === 'not_applicable' ? '<span class="badge badge-muted text-xs">○ 不涉及</span>' :
+                      status === 'problem' ? '<span class="badge badge-danger text-xs">✗ 有问题</span>' :
+                      status === 'rectified' ? '<span class="badge badge-info text-xs">已整改</span>' :
+                      '<span class="badge badge-muted text-xs">未检查</span>'}
+                  </div>
+                `}
+
+                <!-- 问题整改面板（仅有问题/已整改时显示） -->
+                ${(status === 'problem' || status === 'rectified') ? `
+                  <div class="rectify-panel" id="rectify-${item.id}">
+                    ${isDraft ? `
+                      <div class="form-group mb-2">
+                        <label class="form-label text-xs">整改措施</label>
+                        <textarea id="measure-${item.id}" class="form-input text-sm" rows="2"
+                                  placeholder="请描述整改措施..."
+                                  data-item-id="${item.id}" data-type="measure">${result?.rectification_measure || ''}</textarea>
+                      </div>
+                      <div class="form-group mb-2">
+                        <label class="form-label text-xs">整改日期</label>
+                        <input type="date" id="date-${item.id}" class="form-input text-sm"
+                               value="${result?.rectification_date || ''}"
+                               data-item-id="${item.id}" data-type="date">
+                      </div>
+                      ${status === 'problem' ? `
+                        <div class="mb-2">
+                          <button class="result-btn pass text-xs" data-item-id="${item.id}" data-action="rectified">
+                            标记已整改
+                          </button>
+                        </div>
+                      ` : ''}
+                    ` : `
+                      <p class="text-xs text-secondary">整改措施：${result?.rectification_measure || '-'}</p>
+                      ${result?.rectification_date ? `<p class="text-xs text-secondary mt-1">整改日期：${formatDate(result.rectification_date)}</p>` : ''}
+                    `}
+                  </div>
+                ` : ''}
+
+                <!-- ★ 照片/视频上传区域（每项都显示，草稿状态可上传） -->
+                ${result ? `
+                  <div class="photo-upload-area" id="photo-area-${item.id}">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="text-xs text-muted font-medium">📷 现场照片/视频</span>
+                      <span id="upload-count-${item.id}" class="text-xs text-muted">${evidenceFiles.length > 0 ? evidenceFiles.length + ' 个文件' : ''}</span>
+                    </div>
+                    <!-- 已上传文件缩略图 -->
+                    <div class="flex flex-wrap gap-2 mb-2" id="evidence-${item.id}">
+                      ${evidenceFiles.map(f => `
+                        <div class="evidence-thumb" data-url="${SUPABASE_STORAGE_URL}${f.storage_path}" data-type="${f.file_type}">
+                          ${f.file_type === 'image'
+                            ? `<img src="${SUPABASE_STORAGE_URL}${f.storage_path}" alt="${f.file_name}" loading="lazy">`
+                            : `<video><source src="${SUPABASE_STORAGE_URL}${f.storage_path}"></video>`}
+                          ${isDraft ? `<div class="del-btn" data-file-id="${f.id}" data-item-id="${item.id}">×</div>` : ''}
+                        </div>
+                      `).join('')}
+                    </div>
+                    <!-- 上传按钮 -->
+                    ${isDraft ? `
+                      <div class="flex items-center gap-2">
+                        <label class="upload-btn" for="file-${item.id}" id="upload-label-${item.id}">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                          </svg>
+                          上传照片/视频
+                        </label>
+                        <input type="file" id="file-${item.id}" accept="image/*,video/*" capture="environment" class="hidden"
+                               data-item-id="${item.id}">
+                        <span id="uploading-${item.id}" class="hidden text-xs text-muted">
+                          <span class="uploading-spinner"></span> 上传中...
+                        </span>
+                      </div>
+                    ` : ''}
+                  </div>
+                ` : `
+                  <!-- 未检查时提示先标记结果才能上传 -->
+                  ${isDraft ? `
+                    <div class="mt-2 text-xs text-muted opacity-60">
+                      💡 请先标记检查结果，再上传照片/视频
+                    </div>
+                  ` : ''}
+                `}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+      bindItemEvents(container);
+    }
+
+    // 使用事件委托绑定检查项事件
+    function bindItemEvents(container) {
+      // 先移除旧的事件监听（通过替换节点）
+      const newContainer = container.cloneNode(true);
+      container.parentNode.replaceChild(newContainer, container);
+      const itemsList = document.getElementById('itemsList');
+
+      // 结果按钮点击
+      itemsList.addEventListener('click', async (e) => {
+        // 结果按钮
+        const resultBtn = e.target.closest('[data-action]');
+        if (resultBtn && resultBtn.dataset.itemId && !resultBtn.disabled) {
+          const itemId = resultBtn.dataset.itemId;
+          const action = resultBtn.dataset.action;
+          await setResult(itemId, action);
+          return;
+        }
+
+        // 证据缩略图点击（查看）
+        const thumb = e.target.closest('.evidence-thumb');
+        if (thumb && !e.target.closest('.del-btn')) {
+          const url = thumb.dataset.url;
+          const type = thumb.dataset.type;
+          if (url) openLightbox(url, type);
+          return;
+        }
+
+        // 删除证据按钮
+        const delBtn = e.target.closest('.del-btn');
+        if (delBtn) {
+          e.stopPropagation();
+          const fileId = delBtn.dataset.fileId;
+          const itemId = delBtn.dataset.itemId;
+          if (fileId && itemId) await deleteEvidence(fileId, itemId);
+          return;
+        }
+      });
+
+      // 整改信息输入（失焦保存）
+      itemsList.addEventListener('blur', async (e) => {
+        const el = e.target;
+        if (el.dataset.type === 'measure' || el.dataset.type === 'date') {
+          await saveRectification(el.dataset.itemId);
+        }
+      }, true);
+
+      // 文件上传
+      itemsList.addEventListener('change', async (e) => {
+        const input = e.target;
+        if (input.type === 'file' && input.dataset.itemId) {
+          if (input.files && input.files.length > 0) {
+            await uploadEvidence(input.dataset.itemId, input);
+          }
+        }
+      });
+    }
+
+    // 设置筛选标签（只绑定一次）
+    function setupFilterTabs() {
+      document.getElementById('filterTabsContainer').addEventListener('click', (e) => {
+        const tab = e.target.closest('.filter-tab');
+        if (!tab) return;
+        currentFilter = tab.dataset.filter;
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        renderItems();
+      });
+    }
+
+    // ★ 核心修复：设置检查结果
+    // 修复方案：INSERT/UPDATE 后手动构建结果对象，不依赖 SELECT 返回（避免 evidence_files RLS 问题）
+    async function setResult(itemId, status) {
+      if (task.status !== 'draft') return;
+      if (savingItems.has(itemId)) return;
+      savingItems.add(itemId);
+
+      // 立即更新 UI 按钮状态（乐观更新）
+      const card = document.getElementById('item-card-' + itemId);
+      if (card) {
+        card.querySelectorAll('[data-action]').forEach(btn => {
+          btn.disabled = true;
+        });
+      }
+
+      showAutoSaveStatus('保存中...');
+
+      try {
+        const existing = results[itemId];
+        let savedData;
+
+        if (existing) {
+          // 更新已有结果
+          const { error } = await supabase
+            .from('inspection_results')
+            .update({ status, updated_at: new Date().toISOString() })
+            .eq('id', existing.id);
+
+          if (error) {
+            console.error('UPDATE inspection_results error:', error);
+            throw new Error('更新失败：' + (error.message || error.code));
+          }
+
+          // 手动构建更新后的对象（保留已有 evidence_files）
+          savedData = {
+            ...existing,
+            status,
+            updated_at: new Date().toISOString()
+          };
+        } else {
+          // 插入新结果
+          const { data, error } = await supabase
+            .from('inspection_results')
+            .insert({ task_id: taskId, item_id: itemId, status })
+            .select('id, task_id, item_id, status, rectification_measure, rectification_date, created_at, updated_at')
+            .single();
+
+          if (error) {
+            console.error('INSERT inspection_results error:', error);
+            let errMsg = '保存失败';
+            if (error.code === '42501') errMsg = '权限不足，请重新登录后重试';
+            else if (error.code === '23503') errMsg = '数据关联错误（外键约束），请联系管理员';
+            else if (error.code === '23505') errMsg = '记录已存在，请刷新页面重试';
+            else if (error.message) errMsg = error.message;
+            throw new Error(errMsg);
+          }
+
+          // 新记录没有 evidence_files
+          savedData = { ...data, evidence_files: [] };
+        }
+
+        // 更新本地状态
+        results[itemId] = savedData;
+
+        // 更新任务统计
+        await updateTaskStats();
+        updateProgress();
+        renderItems();
+
+        showAutoSaveStatus('已自动保存 ✓');
+
+      } catch (err) {
+        console.error('setResult error:', err);
+        showToast(err.message || '保存失败，请重试', 'error');
+
+        // 恢复按钮状态
+        if (card) {
+          card.querySelectorAll('[data-action]').forEach(btn => {
+            btn.disabled = false;
+          });
+        }
+        showAutoSaveStatus('');
+      } finally {
+        savingItems.delete(itemId);
+      }
+    }
+
+    // 显示自动保存状态
+    function showAutoSaveStatus(msg) {
+      const el = document.getElementById('autoSaveStatus');
+      if (!el) return;
+      if (msg) {
+        el.textContent = msg;
+        el.classList.remove('hidden');
+      } else {
+        el.classList.add('hidden');
+      }
+    }
+
+    // 保存整改信息
+    async function saveRectification(itemId) {
+      if (task.status !== 'draft') return;
+      const result = results[itemId];
+      if (!result) return;
+
+      const measure = document.getElementById('measure-' + itemId)?.value || '';
+      const date = document.getElementById('date-' + itemId)?.value || null;
+
+      try {
+        const { error } = await supabase
+          .from('inspection_results')
+          .update({
+            rectification_measure: measure,
+            rectification_date: date || null,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', result.id);
+
+        if (error) throw error;
+        results[itemId].rectification_measure = measure;
+        results[itemId].rectification_date = date;
+        showAutoSaveStatus('已自动保存 ✓');
+      } catch (err) {
+        console.error('saveRectification error:', err);
+        showToast('保存整改信息失败：' + (err.message || '未知错误'), 'error');
+      }
+    }
+
+    // ★ 修复：上传证据文件（每项都可上传，不限于有问题的项）
+    async function uploadEvidence(itemId, input) {
+      if (!input.files || input.files.length === 0) return;
+      const file = input.files[0];
+      const result = results[itemId];
+
+      if (!result) {
+        showToast('请先标记检查结果（无问题/不涉及/有问题），再上传照片', 'warning');
+        input.value = '';
+        return;
+      }
+
+      if (uploadingItems.has(itemId)) {
+        showToast('正在上传中，请稍候', 'warning');
+        return;
+      }
+
+      uploadingItems.add(itemId);
+
+      // 显示上传中状态
+      const uploadLabel = document.getElementById('upload-label-' + itemId);
+      const uploadingIndicator = document.getElementById('uploading-' + itemId);
+      if (uploadLabel) uploadLabel.style.display = 'none';
+      if (uploadingIndicator) uploadingIndicator.classList.remove('hidden');
+
+      try {
+        const ext = file.name.split('.').pop().toLowerCase();
+        const path = `${taskId}/${itemId}/${Date.now()}.${ext}`;
+        const fileType = file.type.startsWith('video/') ? 'video' : 'image';
+
+        // 上传到 Storage
+        const { error: uploadError } = await supabase.storage
+          .from('evidence-files')
+          .upload(path, file, { upsert: false });
+
+        if (uploadError) {
+          console.error('Storage upload error:', uploadError);
+          throw new Error('文件上传失败：' + (uploadError.message || '存储错误'));
+        }
+
+        // 写入 evidence_files 表
+        const { data: evData, error: evError } = await supabase
+          .from('evidence_files')
+          .insert({
+            result_id: result.id,
+            file_name: file.name,
+            file_type: fileType,
+            file_size: file.size,
+            storage_path: path
+          })
+          .select('id, result_id, file_name, file_type, file_size, storage_path, created_at')
+          .single();
+
+        if (evError) {
+          console.error('evidence_files insert error:', evError);
+          // 尝试删除已上传的文件
+          await supabase.storage.from('evidence-files').remove([path]);
+          throw new Error('记录保存失败：' + (evError.message || evError.code));
+        }
+
+        // 更新本地状态
+        if (!results[itemId].evidence_files) results[itemId].evidence_files = [];
+        results[itemId].evidence_files.push(evData);
+
+        // 动态更新 UI（不重新渲染整个列表）
+        const evidenceContainer = document.getElementById('evidence-' + itemId);
+        if (evidenceContainer) {
+          const thumb = document.createElement('div');
+          thumb.className = 'evidence-thumb';
+          thumb.dataset.url = SUPABASE_STORAGE_URL + path;
+          thumb.dataset.type = fileType;
+          if (fileType === 'image') {
+            thumb.innerHTML = `<img src="${SUPABASE_STORAGE_URL}${path}" alt="${file.name}" loading="lazy"><div class="del-btn" data-file-id="${evData.id}" data-item-id="${itemId}">×</div>`;
+          } else {
+            thumb.innerHTML = `<video><source src="${SUPABASE_STORAGE_URL}${path}"></video><div class="del-btn" data-file-id="${evData.id}" data-item-id="${itemId}">×</div>`;
+          }
+          evidenceContainer.appendChild(thumb);
+        }
+
+        // 更新文件计数
+        const countEl = document.getElementById('upload-count-' + itemId);
+        if (countEl) {
+          const count = results[itemId].evidence_files.length;
+          countEl.textContent = count > 0 ? count + ' 个文件' : '';
+        }
+
+        showToast('照片上传成功 ✓');
+        input.value = '';
+
+      } catch (err) {
+        console.error('uploadEvidence error:', err);
+        showToast('上传失败：' + (err.message || '未知错误'), 'error');
+        input.value = '';
+      } finally {
+        uploadingItems.delete(itemId);
+        // 恢复上传按钮
+        if (uploadLabel) uploadLabel.style.display = '';
+        if (uploadingIndicator) uploadingIndicator.classList.add('hidden');
+      }
+    }
+
+    // 删除证据文件
+    async function deleteEvidence(fileId, itemId) {
+      if (!confirm('确定要删除此证据文件吗？')) return;
+      try {
+        // 找到文件信息
+        const fileInfo = results[itemId]?.evidence_files?.find(f => f.id === fileId);
+
+        const { error } = await supabase.from('evidence_files').delete().eq('id', fileId);
+        if (error) throw error;
+
+        // 尝试从 Storage 删除（可选，不影响主流程）
+        if (fileInfo?.storage_path) {
+          await supabase.storage.from('evidence-files').remove([fileInfo.storage_path]);
+        }
+
+        if (results[itemId]?.evidence_files) {
+          results[itemId].evidence_files = results[itemId].evidence_files.filter(f => f.id !== fileId);
+        }
+
+        // 局部更新 UI
+        const thumb = document.querySelector(`.del-btn[data-file-id="${fileId}"]`)?.closest('.evidence-thumb');
+        if (thumb) thumb.remove();
+
+        // 更新文件计数
+        const countEl = document.getElementById('upload-count-' + itemId);
+        if (countEl) {
+          const count = results[itemId]?.evidence_files?.length || 0;
+          countEl.textContent = count > 0 ? count + ' 个文件' : '';
+        }
+
+        showToast('已删除');
+      } catch (err) {
+        showToast('删除失败：' + (err.message || '未知错误'), 'error');
+      }
+    }
+
+    // 更新任务统计
+    async function updateTaskStats() {
+      const completed = Object.keys(results).length;
+      const problems = Object.values(results).filter(r => r.status === 'problem').length;
+
+      const { error } = await supabase
+        .from('inspection_tasks')
+        .update({
+          completed_items: completed,
+          problem_items: problems,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', taskId);
+
+      if (error) console.warn('updateTaskStats error:', error);
+
+      task.completed_items = completed;
+      task.problem_items = problems;
+    }
+
+    // 设置提交按钮
+    function setupSubmitBtn() {
+      const btn = document.getElementById('submitBtn');
+      if (task.status !== 'draft') return;
+      btn.classList.remove('hidden');
+
+      btn.addEventListener('click', async () => {
+        const total = items.length;
+        const checked = Object.keys(results).length;
+
+        if (checked < total) {
+          if (!confirm(`还有 ${total - checked} 项未检查，确定要提交审核吗？`)) return;
+        } else {
+          if (!confirm('确定要提交审核吗？提交后将无法修改。')) return;
+        }
+
+        setLoading(true);
+        try {
+          const { error } = await supabase
+            .from('inspection_tasks')
+            .update({ status: 'submitted', updated_at: new Date().toISOString() })
+            .eq('id', taskId);
+
+          if (error) throw error;
+
+          await supabase.from('operation_logs').insert({
+            task_id: taskId,
+            operator_name: currentUser.profile?.display_name || currentUser.email,
+            operation_type: 'submit',
+            operation_detail: '提交审核'
+          });
+
+          showToast('已提交审核');
+          setTimeout(() => window.location.href = './home.html', 1500);
+        } catch (err) {
+          showToast('提交失败：' + (err.message || '未知错误'), 'error');
+        } finally {
+          setLoading(false);
+        }
+      });
+    }
+
+    // 返回
+    window.goBack = function() {
+      window.history.back();
+    };
+
+    // 灯箱
+    window.openLightbox = function(url, type) {
+      const lb = document.getElementById('lightbox');
+      const content = document.getElementById('lightboxContent');
+      content.innerHTML = type === 'image'
+        ? `<img src="${url}" alt="预览">`
+        : `<video controls autoplay><source src="${url}"></video>`;
+      lb.classList.remove('hidden');
+    };
+    window.closeLightbox = function() {
+      document.getElementById('lightbox').classList.add('hidden');
+      document.getElementById('lightboxContent').innerHTML = '';
+    };
+
+    // 辅助函数
+    function formatDate(dateStr) {
+      if (!dateStr) return '-';
+      const d = new Date(dateStr);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    }
+
+    window.showToast = function(message, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `<span>${type === 'success' ? '✓' : type === 'error' ? '✗' : '⚠'}</span><span>${message}</span>`;
+      toastContainer.appendChild(toast);
+      setTimeout(() => {
+        toast.style.animation = 'slideIn 0.3s ease reverse';
+        setTimeout(() => toast.remove(), 300);
+      }, type === 'error' ? 5000 : 3000);
+    };
+
+    window.setLoading = function(show) {
+      loadingOverlay.classList.toggle('hidden', !show);
+    };
+  </script>
+</body>
+</html>
